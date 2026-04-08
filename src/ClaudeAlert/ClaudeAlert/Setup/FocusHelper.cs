@@ -62,6 +62,11 @@ public static class FocusHelper
             if (fgWnd == IntPtr.Zero) return false;
 
             GetWindowThreadProcessId(fgWnd, out int pid);
+
+            // Exclude ourselves
+            if (pid == Environment.ProcessId)
+                return false;
+
             var proc = Process.GetProcessById(pid);
             var procName = proc.ProcessName.ToLowerInvariant();
 
