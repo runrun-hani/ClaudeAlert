@@ -1,6 +1,6 @@
 namespace ClaudeAlert.Core;
 
-public static class Localization
+public static class L10n
 {
     public enum Language { Korean, English }
 

@@ -222,7 +222,11 @@ public partial class OverlayWindow : Window
         settingsItem.Click += (_, _) =>
         {
             var settings = AppSettings.Load();
-            var win = new SettingsWindow(settings, path => LoadImage(path));
+            var win = new SettingsWindow(settings, () =>
+            {
+                if (!string.IsNullOrEmpty(settings.CustomImagePath))
+                    LoadImage(settings.CustomImagePath);
+            });
             win.ShowDialog();
         };
         menu.Items.Add(settingsItem);
