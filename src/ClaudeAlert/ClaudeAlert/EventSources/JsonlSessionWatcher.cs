@@ -170,32 +170,22 @@ public class JsonlSessionWatcher : IClaudeEventSource
             switch (reason)
             {
                 case "tool_use":
-                    OnEvent?.Invoke(ClaudeEvent.Now("tool_use"));
+                    // Claude wants to use a tool → waiting for user permission
+                    OnEvent?.Invoke(ClaudeEvent.Now("permission_prompt"));
                     return;
                 case "end_turn":
                     OnEvent?.Invoke(ClaudeEvent.Now("stop"));
                     return;
             }
         }
-
-        // Check content array for tool_use blocks
-        if (msg.TryGetProperty("content", out var content) && content.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var block in content.EnumerateArray())
-            {
-                if (block.TryGetProperty("type", out var blockType) &&
-                    blockType.GetString() == "tool_use")
-                {
-                    OnEvent?.Invoke(ClaudeEvent.Now("tool_use"));
-                    return;
-                }
-            }
-        }
     }
 
     private void ProcessToolResult(JsonElement root)
     {
-        // Check if tool result contains error indicators
+        // Tool result arrived → tool was approved and executed
+        OnEvent?.Invoke(ClaudeEvent.Now("tool_use"));
+
+        // Also check for errors in the result
         if (root.TryGetProperty("message", out var msg) &&
             msg.TryGetProperty("content", out var content))
         {
