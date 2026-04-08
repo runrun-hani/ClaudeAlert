@@ -104,19 +104,22 @@ public class ClaudeStatusManager : INotifyPropertyChanged
                 CurrentState = ClaudeState.Active;
                 break;
             case "stop":
-                StartEscalation();
                 CurrentState = ClaudeState.Done;
+                // Only alert if user is NOT looking at Claude Code
+                if (!Setup.FocusHelper.IsClaudeCodeFocused())
+                    StartEscalation();
                 break;
             case "permission_prompt":
-                StartEscalation();
                 CurrentState = ClaudeState.WaitingForInput;
+                if (!Setup.FocusHelper.IsClaudeCodeFocused())
+                    StartEscalation();
                 break;
             case "idle_prompt":
-                StartEscalation();
                 CurrentState = ClaudeState.WaitingForInput;
+                if (!Setup.FocusHelper.IsClaudeCodeFocused())
+                    StartEscalation();
                 break;
             case "user_active":
-                // User sent a new message → they saw the alert
                 if (IsEscalating)
                     Acknowledge();
                 break;
