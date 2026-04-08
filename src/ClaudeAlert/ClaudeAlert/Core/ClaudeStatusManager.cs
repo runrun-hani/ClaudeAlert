@@ -56,6 +56,9 @@ public class ClaudeStatusManager : INotifyPropertyChanged
     {
         get
         {
+            if (CurrentState is ClaudeState.Idle or ClaudeState.Acknowledged)
+                return "";
+
             var elapsed = DateTime.UtcNow - _lastStateChangeTime;
             var suffix = CurrentState == ClaudeState.Active
                 ? L10n.Get("elapsed.suffix.active")
