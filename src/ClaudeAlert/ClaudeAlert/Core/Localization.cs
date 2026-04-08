@@ -67,6 +67,7 @@ public static class L10n
         ["tray.tooltip.stuck"] = new() { [Language.Korean] = "ClaudeAlert - 멈춤", [Language.English] = "ClaudeAlert - Stuck" },
         ["tray.tooltip.error"] = new() { [Language.Korean] = "ClaudeAlert - 오류", [Language.English] = "ClaudeAlert - Error" },
         ["tray.show_hide"] = new() { [Language.Korean] = "보이기/숨기기", [Language.English] = "Show/Hide" },
+        ["tray.acknowledge"] = new() { [Language.Korean] = "알림 중지", [Language.English] = "Stop Alert" },
         ["tray.exit"] = new() { [Language.Korean] = "종료", [Language.English] = "Exit" },
 
         // Context menu

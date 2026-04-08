@@ -12,6 +12,7 @@ public class TrayIconManager : IDisposable
     private readonly ClaudeStatusManager _statusManager;
     private readonly OverlayWindow _overlay;
     private readonly StatusBarWindow? _statusBar;
+    private readonly ToolStripMenuItem _ackItem;
 
     public TrayIconManager(ClaudeStatusManager statusManager, OverlayWindow overlay, StatusBarWindow? statusBar = null)
     {
@@ -27,10 +28,23 @@ public class TrayIconManager : IDisposable
         };
 
         var menu = new ContextMenuStrip();
+        _ackItem = new ToolStripMenuItem(L10n.Get("tray.acknowledge"), null, (_, _) =>
+        {
+            _statusManager.Acknowledge();
+        });
+        _ackItem.Visible = false;
+        menu.Items.Add(_ackItem);
         menu.Items.Add(L10n.Get("tray.show_hide"), null, (_, _) => ToggleWindows());
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(L10n.Get("tray.exit"), null, (_, _) => System.Windows.Application.Current.Shutdown());
         _notifyIcon.ContextMenuStrip = menu;
+
+        // Single click on tray icon = acknowledge if escalating
+        _notifyIcon.Click += (_, _) =>
+        {
+            if (_statusManager.IsEscalating)
+                _statusManager.Acknowledge();
+        };
         _notifyIcon.DoubleClick += (_, _) => ShowWindows();
 
         _statusManager.StateChanged += OnStateChanged;
@@ -69,6 +83,7 @@ public class TrayIconManager : IDisposable
 
         _notifyIcon.Icon = CreateIcon(color);
         _notifyIcon.Text = L10n.Get(tooltipKey);
+        _ackItem.Visible = _statusManager.IsEscalating;
     }
 
     private static Icon CreateIcon(Color color)

@@ -38,6 +38,9 @@ public static class FocusHelper
         }
     }
 
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);
+
     public static bool IsClaudeCodeFocused()
     {
         try
@@ -45,9 +48,20 @@ public static class FocusHelper
             var fgWnd = GetForegroundWindow();
             if (fgWnd == IntPtr.Zero) return false;
 
+            // Get the actual foreground window title (more reliable than process title)
+            var sb = new System.Text.StringBuilder(512);
+            GetWindowText(fgWnd, sb, 512);
+            var title = sb.ToString();
+
+            // Match Claude Code desktop app, terminal running claude, etc.
+            if (title.Contains("Claude", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // Also check process name for claude-related processes
             GetWindowThreadProcessId(fgWnd, out int pid);
             var proc = Process.GetProcessById(pid);
-            return proc.MainWindowTitle.Contains("Claude", StringComparison.OrdinalIgnoreCase);
+            var procName = proc.ProcessName;
+            return procName.Contains("claude", StringComparison.OrdinalIgnoreCase);
         }
         catch
         {
