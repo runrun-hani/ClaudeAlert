@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(timeout 5 dotnet run)",
+      "Bash(explorer.exe \"C:\\\\Users\\\\hllee\\\\AppData\\\\Roaming\\\\ClaudeAlert\\\\images\")",
+      "Bash(cmd.exe //c \"explorer C:\\\\Users\\\\hllee\\\\AppData\\\\Roaming\\\\ClaudeAlert\\\\images\")",
+      "Bash(cmd.exe //c \"start \"\" \"\"C:\\\\Users\\\\hllee\\\\AppData\\\\Roaming\\\\ClaudeAlert\\\\images\"\"\")",
+      "Bash(cmd.exe //c \"echo %APPDATA%\")",
+      "Bash(powershell.exe -Command \"Test-Path ''C:\\\\Users\\\\hllee\\\\AppData\\\\Roaming\\\\ClaudeAlert\\\\images''; Get-Item ''C:\\\\Users\\\\hllee\\\\AppData\\\\Roaming\\\\ClaudeAlert\\\\images'' | Select-Object FullName, Attributes\")",
+      "Bash(powershell.exe -Command \"Invoke-Item ''C:\\\\Users\\\\hllee\\\\AppData\\\\Roaming\\\\ClaudeAlert\\\\images''\")",
+      "Bash(powershell.exe -Command \"Start-Process explorer.exe -ArgumentList ''/select,C:\\\\Users\\\\hllee\\\\AppData\\\\Roaming\\\\ClaudeAlert\\\\config.json''\")",
+      "Bash(powershell.exe -Command \"[Environment]::GetFolderPath\\(''MyDocuments''\\)\")",
+      "Bash(mkdir -p \"C:/Users/hllee/OneDrive/문서/ClaudeAlert/images\")",
+      "Read(//c/Users/hllee/OneDrive/문서/**)"
+    ]
+  }
+}
