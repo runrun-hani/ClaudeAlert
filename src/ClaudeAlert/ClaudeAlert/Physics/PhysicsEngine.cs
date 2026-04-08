@@ -12,6 +12,7 @@ public class PhysicsEngine
     private double _screenTop;
     private double _screenRight;
     private double _screenBottom;
+    private double _dpiScale = 1.0;
     private bool _running;
     private DateTime _lastFrame;
 
@@ -22,25 +23,33 @@ public class PhysicsEngine
     public PhysicsEngine(PhysicsBody body)
     {
         _body = body;
+        // Detect DPI scale: physical pixels / WPF logical units
+        using var g = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
+        _dpiScale = g.DpiX / 96.0;
+
         UpdateScreenBounds();
     }
 
     public void UpdateScreenBounds()
     {
         // Get the monitor that contains the body's current center position
-        var centerX = (int)(_body.Position.X + _body.Width / 2);
-        var centerY = (int)(_body.Position.Y + _body.Height / 2);
+        // Convert WPF logical coords to physical pixels for Screen.FromPoint
+        var centerX = (int)((_body.Position.X + _body.Width / 2) * _dpiScale);
+        var centerY = (int)((_body.Position.Y + _body.Height / 2) * _dpiScale);
         var screen = Screen.FromPoint(new System.Drawing.Point(centerX, centerY));
-        var wa = screen.WorkingArea; // excludes taskbar
+        var wa = screen.WorkingArea; // physical pixels, excludes taskbar
 
-        _screenLeft = wa.Left;
-        _screenTop = wa.Top;
-        _screenRight = wa.Right;
-        _screenBottom = wa.Bottom;
-        _groundY = wa.Bottom - _body.Height;
+        // Convert physical pixels back to WPF logical units
+        _screenLeft = wa.Left / _dpiScale;
+        _screenTop = wa.Top / _dpiScale;
+        _screenRight = wa.Right / _dpiScale;
+        _screenBottom = wa.Bottom / _dpiScale;
+        _groundY = _screenBottom - _body.Height;
     }
 
     public double GroundY => _groundY;
+    public double ScreenLeft => _screenLeft;
+    public double ScreenRight => _screenRight;
 
     public void Start()
     {
@@ -85,15 +94,15 @@ public class PhysicsEngine
         _body.Rotation += _body.AngularVelocity * dt;
 
         // Recalculate screen bounds based on current position (handles monitor transitions)
-        var centerX = (int)(pos.X + _body.Width / 2);
-        var centerY = (int)(pos.Y + _body.Height / 2);
+        var centerX = (int)((pos.X + _body.Width / 2) * _dpiScale);
+        var centerY = (int)((pos.Y + _body.Height / 2) * _dpiScale);
         var screen = Screen.FromPoint(new System.Drawing.Point(centerX, centerY));
         var wa = screen.WorkingArea;
-        _screenLeft = wa.Left;
-        _screenTop = wa.Top;
-        _screenRight = wa.Right;
-        _screenBottom = wa.Bottom;
-        _groundY = wa.Bottom - _body.Height;
+        _screenLeft = wa.Left / _dpiScale;
+        _screenTop = wa.Top / _dpiScale;
+        _screenRight = wa.Right / _dpiScale;
+        _screenBottom = wa.Bottom / _dpiScale;
+        _groundY = _screenBottom - _body.Height;
 
         // Ground collision
         if (pos.Y >= _groundY)
