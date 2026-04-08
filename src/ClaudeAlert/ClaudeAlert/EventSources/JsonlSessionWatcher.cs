@@ -80,7 +80,7 @@ public class JsonlSessionWatcher : IClaudeEventSource
             {
                 // Switch to watching a new file
                 _currentFile = latestFile.FullName;
-                _lastPosition = Math.Max(0, latestFile.Length - 2048); // Read last 2KB for context
+                _lastPosition = latestFile.Length; // Start from end — only process NEW events
                 WatchFile(_currentFile);
             }
 
