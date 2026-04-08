@@ -60,4 +60,18 @@ public partial class StatusBarWindow : Window
         StatusLabel.FontSize = fontSize;
         ElapsedLabel.FontSize = Math.Max(fontSize - 2, 7);
     }
+
+    private readonly List<string> _debugLines = new();
+
+    public void AddDebugLog(string msg)
+    {
+        Dispatcher.InvokeAsync(() =>
+        {
+            var time = DateTime.Now.ToString("HH:mm:ss");
+            _debugLines.Add($"[{time}] {msg}");
+            if (_debugLines.Count > 20)
+                _debugLines.RemoveAt(0);
+            DebugLog.Text = string.Join("\n", _debugLines);
+        });
+    }
 }

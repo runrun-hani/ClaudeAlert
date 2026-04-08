@@ -9,21 +9,34 @@
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize">
 
-    <Border Background="#CC1E1E1E" CornerRadius="6" Padding="12,6" MinWidth="80">
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-            <TextBlock x:Name="StatusLabel"
-                       Text="대기"
-                       Foreground="#CCCCCC"
-                       FontSize="11"
-                       TextAlignment="Center"
-                       FontFamily="Segoe UI"
-                       FontWeight="SemiBold"/>
-            <TextBlock x:Name="ElapsedLabel"
-                       Text=""
-                       Foreground="#888888"
-                       FontSize="9"
-                       TextAlignment="Center"
-                       FontFamily="Segoe UI"/>
-        </StackPanel>
-    </Border>
+    <StackPanel Orientation="Horizontal">
+        <Border Background="#CC1E1E1E" CornerRadius="6" Padding="12,6" MinWidth="80">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                <TextBlock x:Name="StatusLabel"
+                           Text="대기"
+                           Foreground="#CCCCCC"
+                           FontSize="11"
+                           TextAlignment="Center"
+                           FontFamily="Segoe UI"
+                           FontWeight="SemiBold"/>
+                <TextBlock x:Name="ElapsedLabel"
+                           Text=""
+                           Foreground="#888888"
+                           FontSize="9"
+                           TextAlignment="Center"
+                           FontFamily="Segoe UI"/>
+            </StackPanel>
+        </Border>
+        <Border Background="#CC000000" CornerRadius="6" Padding="8,4" Margin="4,0,0,0"
+                MaxWidth="350" MaxHeight="200">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="DebugLog"
+                           Text=""
+                           Foreground="#88FF88"
+                           FontSize="9"
+                           FontFamily="Consolas"
+                           TextWrapping="Wrap"/>
+            </ScrollViewer>
+        </Border>
+    </StackPanel>
 </Window>

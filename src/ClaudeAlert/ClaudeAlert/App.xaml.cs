@@ -42,21 +42,6 @@ public partial class App : Application
         _cts = new CancellationTokenSource();
 
         // JSONL session watcher (primary event source)
-        _jsonlWatcher = new JsonlSessionWatcher();
-        _jsonlWatcher.OnEvent += evt =>
-        {
-            Dispatcher.InvokeAsync(() => statusManager.ProcessEvent(evt));
-        };
-        _ = _jsonlWatcher.StartAsync(_cts.Token);
-
-        // Log file watcher (error detection fallback)
-        _logWatcher = new LogFileWatcher();
-        _logWatcher.OnEvent += evt =>
-        {
-            Dispatcher.InvokeAsync(() => statusManager.ProcessEvent(evt));
-        };
-        _ = _logWatcher.StartAsync(_cts.Token);
-
         // Overlay window (character only)
         _overlay = new OverlayWindow(statusManager, settings);
         _overlay.Show();
@@ -67,6 +52,36 @@ public partial class App : Application
 
         // Link overlay to status bar for settings sync
         _overlay.StatusBar = _statusBar;
+
+        // JSONL session watcher (primary event source)
+        _jsonlWatcher = new JsonlSessionWatcher();
+        _jsonlWatcher.OnEvent += evt =>
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                _statusBar.AddDebugLog($"EVT: {evt.Type}");
+                statusManager.ProcessEvent(evt);
+            });
+        };
+        _ = _jsonlWatcher.StartAsync(_cts.Token);
+
+        // Log file watcher (error detection fallback)
+        _logWatcher = new LogFileWatcher();
+        _logWatcher.OnEvent += evt =>
+        {
+            Dispatcher.InvokeAsync(() =>
+            {
+                _statusBar.AddDebugLog($"LOG: {evt.Type}");
+                statusManager.ProcessEvent(evt);
+            });
+        };
+        _ = _logWatcher.StartAsync(_cts.Token);
+
+        // Debug: log state changes
+        statusManager.StateChanged += (old, cur) =>
+        {
+            _statusBar.AddDebugLog($"STATE: {old} → {cur}");
+        };
 
         // Sound
         var soundManager = new SoundManager(settings);
