@@ -25,7 +25,6 @@ public partial class SettingsWindow : Window
     {
         _isLoading = true;
 
-        PortBox.Text = _settings.Port.ToString();
         StuckThresholdBox.Text = _settings.StuckThresholdSeconds.ToString();
         JumpBox.Text = _settings.EscalationJumpSeconds.ToString();
         RollBox.Text = _settings.EscalationRollSeconds.ToString();
@@ -38,7 +37,6 @@ public partial class SettingsWindow : Window
         FontSizeSlider.Value = _settings.FontSize;
         FontSizeValue.Text = $"{_settings.FontSize}pt";
 
-        // Language combo
         for (int i = 0; i < LanguageCombo.Items.Count; i++)
         {
             if (LanguageCombo.Items[i] is ComboBoxItem item &&
@@ -49,9 +47,7 @@ public partial class SettingsWindow : Window
             }
         }
 
-        UpdateHookStatus();
         RefreshLabels();
-
         _isLoading = false;
     }
 
@@ -59,7 +55,6 @@ public partial class SettingsWindow : Window
     {
         TitleLabel.Text = L10n.Get("settings.title");
         LanguageLabel.Text = L10n.Get("settings.language");
-        PortLabel.Text = L10n.Get("settings.port");
         StuckLabel.Text = L10n.Get("settings.stuck_threshold");
         EscalationLabel.Text = L10n.Get("settings.escalation_timing");
         JumpLabel.Text = L10n.Get("settings.jump");
@@ -71,23 +66,9 @@ public partial class SettingsWindow : Window
         BrowseButton.Content = L10n.Get("settings.browse");
         ImageSizeLabel.Text = L10n.Get("settings.image_size");
         FontSizeLabel.Text = L10n.Get("settings.font_size");
-        HookLabel.Text = L10n.Get("settings.hook_status");
-        ReconfigureButton.Content = L10n.Get("settings.reconfigure");
         CancelButton.Content = L10n.Get("settings.cancel");
         SaveButton.Content = L10n.Get("settings.save");
         Title = L10n.Get("settings.title");
-        UpdateHookStatus();
-    }
-
-    private void UpdateHookStatus()
-    {
-        var configured = HookConfigurator.IsConfigured(_settings.Port);
-        HookStatusLabel.Text = configured
-            ? L10n.Get("settings.hook_configured")
-            : L10n.Get("settings.hook_not_configured");
-        HookStatusLabel.Foreground = configured
-            ? System.Windows.Media.Brushes.LimeGreen
-            : System.Windows.Media.Brushes.OrangeRed;
     }
 
     private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)
@@ -124,19 +105,8 @@ public partial class SettingsWindow : Window
         }
     }
 
-    private void OnReconfigureClick(object sender, RoutedEventArgs e)
-    {
-        if (int.TryParse(PortBox.Text, out var port))
-        {
-            HookConfigurator.EnsureHooksConfigured(port);
-            _settings.Port = port;
-            UpdateHookStatus();
-        }
-    }
-
     private void OnSaveClick(object sender, RoutedEventArgs e)
     {
-        if (int.TryParse(PortBox.Text, out var port)) _settings.Port = port;
         if (int.TryParse(StuckThresholdBox.Text, out var stuck)) _settings.StuckThresholdSeconds = stuck;
         if (int.TryParse(JumpBox.Text, out var jump)) _settings.EscalationJumpSeconds = jump;
         if (int.TryParse(RollBox.Text, out var roll)) _settings.EscalationRollSeconds = roll;

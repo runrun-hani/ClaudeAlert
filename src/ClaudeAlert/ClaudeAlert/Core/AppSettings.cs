@@ -5,7 +5,6 @@ namespace ClaudeAlert.Core;
 
 public class AppSettings
 {
-    public int Port { get; set; } = 19542;
     public int StuckThresholdSeconds { get; set; } = 120;
     public int EscalationJumpSeconds { get; set; } = 30;
     public int EscalationRollSeconds { get; set; } = 60;

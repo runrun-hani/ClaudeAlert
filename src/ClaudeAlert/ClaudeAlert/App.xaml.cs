@@ -14,9 +14,8 @@ public partial class App : Application
 {
     private Mutex? _mutex;
     private CancellationTokenSource? _cts;
-    private HookHttpListener? _listener;
+    private JsonlSessionWatcher? _jsonlWatcher;
     private LogFileWatcher? _logWatcher;
-    private SessionFileMonitor? _sessionMonitor;
     private TrayIconManager? _trayManager;
     private OverlayWindow? _overlay;
     private StatusBarWindow? _statusBar;
@@ -38,22 +37,25 @@ public partial class App : Application
         // Initialize localization
         L10n.SetLanguage(settings.Language);
 
-        // Auto-configure Claude Code hooks
-        if (!HookConfigurator.IsConfigured(settings.Port))
-        {
-            HookConfigurator.EnsureHooksConfigured(settings.Port);
-        }
-
         var statusManager = new ClaudeStatusManager(settings);
 
-        // HTTP listener
         _cts = new CancellationTokenSource();
-        _listener = new HookHttpListener(settings.Port);
-        _listener.OnEvent += evt =>
+
+        // JSONL session watcher (primary event source)
+        _jsonlWatcher = new JsonlSessionWatcher();
+        _jsonlWatcher.OnEvent += evt =>
         {
             Dispatcher.InvokeAsync(() => statusManager.ProcessEvent(evt));
         };
-        _ = _listener.StartAsync(_cts.Token);
+        _ = _jsonlWatcher.StartAsync(_cts.Token);
+
+        // Log file watcher (error detection fallback)
+        _logWatcher = new LogFileWatcher();
+        _logWatcher.OnEvent += evt =>
+        {
+            Dispatcher.InvokeAsync(() => statusManager.ProcessEvent(evt));
+        };
+        _ = _logWatcher.StartAsync(_cts.Token);
 
         // Overlay window (character only)
         _overlay = new OverlayWindow(statusManager, settings);
@@ -97,18 +99,6 @@ public partial class App : Application
                 soundManager.PlayUrgent();
         };
 
-        // Log file watcher (error detection fallback)
-        _logWatcher = new LogFileWatcher();
-        _logWatcher.OnEvent += evt =>
-        {
-            Dispatcher.InvokeAsync(() => statusManager.ProcessEvent(evt));
-        };
-        _ = _logWatcher.StartAsync(_cts.Token);
-
-        // Session file monitor
-        _sessionMonitor = new SessionFileMonitor();
-        _ = _sessionMonitor.StartAsync(_cts.Token);
-
         // System tray
         _trayManager = new TrayIconManager(statusManager, _overlay, _statusBar);
 
@@ -127,9 +117,8 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _cts?.Cancel();
-        _listener?.Dispose();
+        _jsonlWatcher?.Dispose();
         _logWatcher?.Dispose();
-        _sessionMonitor?.Dispose();
         _trayManager?.Dispose();
         _mutex?.ReleaseMutex();
         _mutex?.Dispose();

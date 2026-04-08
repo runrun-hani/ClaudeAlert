@@ -15,7 +15,8 @@
       "Read(//c/Users/hllee/OneDrive/문서/**)",
       "Bash(gh repo:*)",
       "Bash(tasklist /fi \"imagename eq ClaudeAlert.exe\")",
-      "Bash(handle \"ClaudeAlert.exe\")"
+      "Bash(handle \"ClaudeAlert.exe\")",
+      "Bash(ls -lt ~/.claude/projects/C--Users-hllee-OneDrive----Claude-Projects-ClaudeAlert/*.jsonl)"
     ]
   }
 }
