@@ -48,11 +48,20 @@ public partial class StatusBarWindow : Window
         var exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
         SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOOLWINDOW);
 
-        // Position at bottom center of screen
-        var screenW = SystemParameters.PrimaryScreenWidth;
-        var screenH = SystemParameters.PrimaryScreenHeight;
+        // Position at bottom center of work area (above taskbar)
+        var wa = SystemParameters.WorkArea;
+        Left = wa.Left + (wa.Width - ActualWidth) / 2;
+        Top = wa.Top + wa.Height - 40;
+    }
+
+    public void ResetPosition()
+    {
+        var screenW = SystemParameters.WorkArea.Width;
+        var screenH = SystemParameters.WorkArea.Height;
         Left = (screenW - ActualWidth) / 2;
-        Top = screenH - 80;
+        Top = screenH - 40;
+        Show();
+        Topmost = true;
     }
 
     public void ApplyFontSize(double fontSize)

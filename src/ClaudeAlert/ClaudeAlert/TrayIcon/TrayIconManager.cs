@@ -35,6 +35,7 @@ public class TrayIconManager : IDisposable
         _ackItem.Visible = false;
         menu.Items.Add(_ackItem);
         menu.Items.Add(L10n.Get("tray.show_hide"), null, (_, _) => ToggleWindows());
+        menu.Items.Add(L10n.Get("tray.reset_position"), null, (_, _) => _statusBar?.ResetPosition());
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(L10n.Get("tray.exit"), null, (_, _) => System.Windows.Application.Current.Shutdown());
         _notifyIcon.ContextMenuStrip = menu;
