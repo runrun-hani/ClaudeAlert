@@ -68,27 +68,6 @@ public partial class App : Application
         // Link overlay to status bar for settings sync
         _overlay.StatusBar = _statusBar;
 
-        // Toast notifications
-        var toastNotifier = new ToastNotifier();
-        statusManager.StateChanged += (oldState, newState) =>
-        {
-            switch (newState)
-            {
-                case ClaudeState.Done:
-                    toastNotifier.Show(L10n.Get("toast.done.title"), L10n.Get("toast.done.body"));
-                    break;
-                case ClaudeState.WaitingForInput:
-                    toastNotifier.Show(L10n.Get("toast.waiting.title"), L10n.Get("toast.waiting.body"));
-                    break;
-                case ClaudeState.Stuck:
-                    toastNotifier.Show(L10n.Get("toast.stuck.title"), L10n.Get("toast.stuck.body"));
-                    break;
-                case ClaudeState.Error:
-                    toastNotifier.Show(L10n.Get("toast.error.title"), L10n.Get("toast.error.body"));
-                    break;
-            }
-        };
-
         // Sound
         var soundManager = new SoundManager(settings);
         _overlay.Escalation.LevelChanged += level =>
