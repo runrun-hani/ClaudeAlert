@@ -81,6 +81,7 @@ public partial class OverlayWindow : Window
     }
 
     public EscalationController Escalation => _escalation;
+    public StatusBarWindow? StatusBar { get; set; }
 
     private void ApplyImageSize(int size)
     {
@@ -297,12 +298,12 @@ public partial class OverlayWindow : Window
             var settings = AppSettings.Load();
             var win = new SettingsWindow(settings, () =>
             {
-                // Reload settings into this instance
                 _settings.ImageSize = settings.ImageSize;
                 _settings.FontSize = settings.FontSize;
                 _settings.Language = settings.Language;
                 _settings.CustomImagePath = settings.CustomImagePath;
                 ApplySettings();
+                StatusBar?.ApplyFontSize(settings.FontSize);
             });
             win.ShowDialog();
         };

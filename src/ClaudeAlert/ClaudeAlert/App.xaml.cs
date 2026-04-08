@@ -62,6 +62,9 @@ public partial class App : Application
         _statusBar = new StatusBarWindow(statusManager, settings);
         _statusBar.Show();
 
+        // Link overlay to status bar for settings sync
+        _overlay.StatusBar = _statusBar;
+
         // Toast notifications
         var toastNotifier = new ToastNotifier();
         statusManager.StateChanged += (oldState, newState) =>
