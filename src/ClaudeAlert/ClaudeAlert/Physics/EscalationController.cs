@@ -133,7 +133,7 @@ public class EscalationController
         {
             // Initial kick in random direction
             var angle = _random.NextDouble() * Math.PI * 2;
-            _body.ApplyImpulse(new Vector(Math.Cos(angle) * 400, Math.Sin(angle) * 400 - 300));
+            _body.ApplyImpulse(new Vector(Math.Cos(angle) * 10000, Math.Sin(angle) * 10000));
             _body.AngularVelocity = (_random.NextDouble() - 0.5) * 720;
         }
         else if (_body.Velocity.Length < BounceMaxSpeed)
