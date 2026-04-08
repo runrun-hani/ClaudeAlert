@@ -192,7 +192,7 @@ public class JsonlSessionWatcher : IClaudeEventSource
     private void StartPermissionTimer()
     {
         CancelPermissionTimer();
-        _permissionTimer = new System.Timers.Timer(8000) { AutoReset = false };
+        _permissionTimer = new System.Timers.Timer(5000) { AutoReset = false };
         _permissionTimer.Elapsed += (_, _) =>
         {
             OnEvent?.Invoke(ClaudeEvent.Now("permission_prompt"));
