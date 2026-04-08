@@ -46,9 +46,8 @@ public partial class App : Application
         _overlay = new OverlayWindow(statusManager, settings);
         _overlay.Show();
 
-        // Status bar window (fixed position text)
+        // Status bar window (fixed position text) — hidden by default
         _statusBar = new StatusBarWindow(statusManager, settings);
-        _statusBar.Show();
 
         // Link overlay to status bar for settings sync
         _overlay.StatusBar = _statusBar;

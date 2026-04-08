@@ -279,7 +279,7 @@ public partial class OverlayWindow : Window
                 _settings.SoundEnabled = settings.SoundEnabled;
                 ApplySettings();
                 StatusBar?.ApplyFontSize(settings.FontSize);
-                StatusBar?.ApplyDebugLog(settings.DebugLog);
+                StatusBar?.ApplyVisibility(settings.ShowStatusBar);
             });
             win.ShowDialog();
         };

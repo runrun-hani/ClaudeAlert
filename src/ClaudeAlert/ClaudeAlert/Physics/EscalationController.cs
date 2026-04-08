@@ -73,7 +73,7 @@ public class EscalationController
         {
             EscalationLevel.Jump => TimeSpan.FromSeconds(2.5),
             EscalationLevel.Roll => TimeSpan.FromSeconds(3),
-            EscalationLevel.Bounce => TimeSpan.FromSeconds(1),
+            EscalationLevel.Bounce => TimeSpan.FromMilliseconds(100),
             _ => TimeSpan.FromSeconds(1)
         };
         if (now - _lastActionTime < cooldown) return;

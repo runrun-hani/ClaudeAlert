@@ -83,8 +83,8 @@
             <CheckBox x:Name="AutoStartCheck" Grid.Row="5" Content="Windows 시작 시 자동 실행"
                       Foreground="#CCCCCC" FontSize="13" Margin="0,0,0,12"/>
 
-            <!-- Debug log -->
-            <CheckBox x:Name="DebugLogCheck" Grid.Row="6" Content="디버그 로그"
+            <!-- Show status bar -->
+            <CheckBox x:Name="ShowStatusBarCheck" Grid.Row="6" Content="상태 표시창 표시"
                       Foreground="#CCCCCC" FontSize="13" Margin="0,0,0,12"/>
 
             <!-- Image -->

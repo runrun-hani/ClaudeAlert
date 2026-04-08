@@ -57,7 +57,7 @@ public static class L10n
         ["settings.cancel"] = new() { [Language.Korean] = "취소", [Language.English] = "Cancel" },
         ["settings.image_size"] = new() { [Language.Korean] = "이미지 크기", [Language.English] = "Image Size" },
         ["settings.font_size"] = new() { [Language.Korean] = "폰트 크기", [Language.English] = "Font Size" },
-        ["settings.debug_log"] = new() { [Language.Korean] = "디버그 로그", [Language.English] = "Debug Log" },
+        ["settings.show_status_bar"] = new() { [Language.Korean] = "상태 표시창 표시", [Language.English] = "Show Status Bar" },
         ["settings.image_filter"] = new() { [Language.Korean] = "이미지 파일|*.png;*.gif;*.jpg;*.jpeg", [Language.English] = "Image Files|*.png;*.gif;*.jpg;*.jpeg" },
 
         // Tray icon

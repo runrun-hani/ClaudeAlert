@@ -24,8 +24,12 @@ public partial class StatusBarWindow : Window
 
         StatusLabel.FontSize = settings.FontSize;
         ElapsedLabel.FontSize = Math.Max(settings.FontSize - 2, 7);
-        DebugPanel.Visibility = settings.DebugLog ? Visibility.Visible : Visibility.Collapsed;
-        FocusPanel.Visibility = settings.DebugLog ? Visibility.Visible : Visibility.Collapsed;
+        if (settings.ShowStatusBar)
+        {
+            DebugPanel.Visibility = Visibility.Visible;
+            FocusPanel.Visibility = Visibility.Visible;
+            Show();
+        }
 
         _statusManager.PropertyChanged += (_, args) =>
         {
@@ -66,10 +70,18 @@ public partial class StatusBarWindow : Window
         Topmost = true;
     }
 
-    public void ApplyDebugLog(bool enabled)
+    public void ApplyVisibility(bool show)
     {
-        DebugPanel.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
-        FocusPanel.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
+        if (show)
+        {
+            Show();
+            DebugPanel.Visibility = Visibility.Visible;
+            FocusPanel.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            Hide();
+        }
     }
 
     public void UpdateFocusStatus(bool isFocused, string windowTitle)

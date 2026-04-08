@@ -14,7 +14,7 @@ public class AppSettings
     public int ImageSize { get; set; } = 64;
     public double FontSize { get; set; } = 10;
     public string Language { get; set; } = "Korean";
-    public bool DebugLog { get; set; } = false;
+    public bool ShowStatusBar { get; set; } = false;
 
     private static readonly string ConfigDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ClaudeAlert");
