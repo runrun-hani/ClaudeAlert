@@ -200,7 +200,8 @@ public partial class OverlayWindow : Window
 
     private void OnPhysicsUpdated()
     {
-        Dispatcher.InvokeAsync(SyncWindowToBody);
+        // DispatcherTimer already runs on UI thread, no need for InvokeAsync
+        SyncWindowToBody();
     }
 
     private void SyncWindowToBody()

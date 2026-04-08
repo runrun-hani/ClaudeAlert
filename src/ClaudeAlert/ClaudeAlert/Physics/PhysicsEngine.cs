@@ -1,12 +1,13 @@
 using System.Windows;
 using System.Windows.Forms;
-using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace ClaudeAlert.Physics;
 
 public class PhysicsEngine
 {
     private readonly PhysicsBody _body;
+    private readonly DispatcherTimer _timer;
     private double _groundY;
     private double _screenLeft;
     private double _screenTop;
@@ -15,7 +16,6 @@ public class PhysicsEngine
     private double _dpiScale = 1.0;
     private double _lastBoundsCheckX;
     private double _lastBoundsCheckY;
-    private bool _running;
     private DateTime _lastFrame;
 
     public event Action? Updated;
@@ -27,6 +27,15 @@ public class PhysicsEngine
         _body = body;
         using var g = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
         _dpiScale = g.DpiX / 96.0;
+
+        // Use DispatcherTimer at ~30fps instead of CompositionTarget.Rendering
+        // This prevents UI thread starvation so other timers can run
+        _timer = new DispatcherTimer(DispatcherPriority.Render)
+        {
+            Interval = TimeSpan.FromMilliseconds(33)
+        };
+        _timer.Tick += OnTick;
+
         UpdateScreenBounds();
     }
 
@@ -52,20 +61,17 @@ public class PhysicsEngine
 
     public void Start()
     {
-        if (_running) return;
-        _running = true;
+        if (_timer.IsEnabled) return;
         _lastFrame = DateTime.UtcNow;
-        CompositionTarget.Rendering += OnRendering;
+        _timer.Start();
     }
 
     public void Stop()
     {
-        if (!_running) return;
-        _running = false;
-        CompositionTarget.Rendering -= OnRendering;
+        _timer.Stop();
     }
 
-    private void OnRendering(object? sender, EventArgs e)
+    private void OnTick(object? sender, EventArgs e)
     {
         var now = DateTime.UtcNow;
         var dt = (now - _lastFrame).TotalSeconds;
@@ -96,7 +102,7 @@ public class PhysicsEngine
         // Recalculate screen bounds only when moved significantly
         var dx = pos.X - _lastBoundsCheckX;
         var dy = pos.Y - _lastBoundsCheckY;
-        if (dx * dx + dy * dy > 10000) // ~100px
+        if (dx * dx + dy * dy > 10000)
         {
             _lastBoundsCheckX = pos.X;
             _lastBoundsCheckY = pos.Y;
@@ -116,7 +122,7 @@ public class PhysicsEngine
         {
             pos.Y = _groundY;
             var vy = _body.Velocity.Y;
-            if (Math.Abs(vy) < 100) // higher threshold to prevent ground oscillation
+            if (Math.Abs(vy) < 100)
             {
                 _body.Velocity = new Vector(_body.Velocity.X * _body.Friction, 0);
                 _body.AngularVelocity *= 0.8;
@@ -131,7 +137,6 @@ public class PhysicsEngine
             }
             else
             {
-                // Bounce
                 _body.Velocity = new Vector(
                     _body.Velocity.X * _body.Friction,
                     -vy * _body.BounceFactor);
