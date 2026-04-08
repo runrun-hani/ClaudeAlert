@@ -146,19 +146,11 @@ public partial class OverlayWindow : Window
 
             if (newState == ClaudeState.Acknowledged)
             {
-                // Immediately halt all animation
-                _engine.Stop();
+                // Stop escalation, let gravity bring character down naturally
                 _escalation.Reset();
-                _body.Velocity = new System.Windows.Vector(0, 0);
-                _body.AngularVelocity = 0;
-                _body.IsStatic = true;
-                _body.Rotation = 0;
-                _body.ScaleX = 1;
-                _body.ScaleY = 1;
-                _body.Position = new Point(_body.Position.X, _engine.GroundY);
-                SyncWindowToBody();
                 _bubbleReshowTimer.Stop();
                 HideBubble();
+                SyncWindowToBody();
             }
             else if (_statusManager.IsEscalating)
             {

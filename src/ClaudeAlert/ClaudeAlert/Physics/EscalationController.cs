@@ -120,29 +120,43 @@ public class EscalationController
         }
     }
 
+    private double _bounceTargetSpeed = 400;
+    private const double BounceMaxSpeed = 1200;
+    private const double BounceAccelRate = 200; // speed increase per action
+
     private void DoBounce()
     {
-        // Full screen bounce - chaotic mode
-        if (_body.IsStatic || _body.Velocity.Length < 100)
+        _body.Gravity = 300;
+        _body.BounceFactor = 0.92;
+        _engine.Start();
+
+        // Gradually increase target speed up to max
+        _bounceTargetSpeed = Math.Min(_bounceTargetSpeed + BounceAccelRate, BounceMaxSpeed);
+
+        var currentSpeed = _body.Velocity.Length;
+        if (_body.IsStatic || currentSpeed < _bounceTargetSpeed)
         {
             var angle = _random.NextDouble() * Math.PI * 2;
-            var speed = 800 + _random.Next(400);
-            _body.ApplyImpulse(new Vector(Math.Cos(angle) * speed, Math.Sin(angle) * speed - 600));
+            _body.ApplyImpulse(new Vector(
+                Math.Cos(angle) * _bounceTargetSpeed,
+                Math.Sin(angle) * _bounceTargetSpeed - 400));
             _body.AngularVelocity = (_random.NextDouble() - 0.5) * 1440;
-            _body.Gravity = 300;
-            _body.BounceFactor = 0.92;
-            _engine.Start();
         }
     }
 
     public void Reset()
     {
         _currentLevel = EscalationLevel.None;
+        _bounceTargetSpeed = 400;
         _body.Gravity = 980;
         _body.BounceFactor = 0.5;
-        _body.MakeStatic();
+        // Stop in place — don't teleport to ground
+        _body.Velocity = new Vector(0, 0);
+        _body.AngularVelocity = 0;
+        _body.IsStatic = false; // let gravity bring it down naturally
         _body.ScaleX = 1;
         _body.ScaleY = 1;
+        _engine.Start(); // engine will stop when body reaches ground
         LevelChanged?.Invoke(_currentLevel);
     }
 
