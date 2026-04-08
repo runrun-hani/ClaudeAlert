@@ -10,13 +10,6 @@
         ResizeMode="NoResize">
 
     <Grid x:Name="PetContainer" Background="Transparent">
-        <Grid.RenderTransform>
-            <TransformGroup>
-                <ScaleTransform x:Name="SquashTransform" ScaleX="1" ScaleY="1"/>
-                <RotateTransform x:Name="RotateTransform" Angle="0"/>
-            </TransformGroup>
-        </Grid.RenderTransform>
-
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -27,9 +20,6 @@
                     HorizontalAlignment="Center"
                     Visibility="Collapsed"
                     Margin="0,0,0,2">
-            <StackPanel.RenderTransform>
-                <RotateTransform x:Name="BubbleCounterRotate" Angle="0"/>
-            </StackPanel.RenderTransform>
             <Border x:Name="SpeechBubble"
                     Background="White"
                     CornerRadius="8"
@@ -46,10 +36,18 @@
                      HorizontalAlignment="Center"/>
         </StackPanel>
 
-        <!-- Pet image (Row 1) -->
+        <!-- Pet image (Row 1) — transforms applied here only -->
         <Image x:Name="PetImage" Grid.Row="1"
                Width="64" Height="64"
                Stretch="Uniform"
-               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
+               RenderOptions.BitmapScalingMode="NearestNeighbor"
+               RenderTransformOrigin="0.5,0.5">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform x:Name="SquashTransform" ScaleX="1" ScaleY="1"/>
+                    <RotateTransform x:Name="RotateTransform" Angle="0"/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
     </Grid>
 </Window>

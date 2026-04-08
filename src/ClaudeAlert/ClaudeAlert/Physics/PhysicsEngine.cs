@@ -13,6 +13,8 @@ public class PhysicsEngine
     private double _screenRight;
     private double _screenBottom;
     private double _dpiScale = 1.0;
+    private double _lastBoundsCheckX;
+    private double _lastBoundsCheckY;
     private bool _running;
     private DateTime _lastFrame;
 
@@ -93,16 +95,23 @@ public class PhysicsEngine
         // Rotation
         _body.Rotation += _body.AngularVelocity * dt;
 
-        // Recalculate screen bounds based on current position (handles monitor transitions)
-        var centerX = (int)((pos.X + _body.Width / 2) * _dpiScale);
-        var centerY = (int)((pos.Y + _body.Height / 2) * _dpiScale);
-        var screen = Screen.FromPoint(new System.Drawing.Point(centerX, centerY));
-        var wa = screen.WorkingArea;
-        _screenLeft = wa.Left / _dpiScale;
-        _screenTop = wa.Top / _dpiScale;
-        _screenRight = wa.Right / _dpiScale;
-        _screenBottom = wa.Bottom / _dpiScale;
-        _groundY = _screenBottom - _body.Height;
+        // Recalculate screen bounds only when moved significantly (prevents jitter)
+        var dx = pos.X - _lastBoundsCheckX;
+        var dy = pos.Y - _lastBoundsCheckY;
+        if (dx * dx + dy * dy > 10000) // ~100px distance
+        {
+            _lastBoundsCheckX = pos.X;
+            _lastBoundsCheckY = pos.Y;
+            var centerX = (int)((pos.X + _body.Width / 2) * _dpiScale);
+            var centerY = (int)((pos.Y + _body.Height / 2) * _dpiScale);
+            var screen = Screen.FromPoint(new System.Drawing.Point(centerX, centerY));
+            var wa = screen.WorkingArea;
+            _screenLeft = wa.Left / _dpiScale;
+            _screenTop = wa.Top / _dpiScale;
+            _screenRight = wa.Right / _dpiScale;
+            _screenBottom = wa.Bottom / _dpiScale;
+            _groundY = _screenBottom - _body.Height;
+        }
 
         // Ground collision
         if (pos.Y >= _groundY)

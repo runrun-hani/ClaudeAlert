@@ -87,11 +87,7 @@ public partial class OverlayWindow : Window
     {
         PetImage.Width = size;
         PetImage.Height = size;
-        var center = size / 2.0;
-        SquashTransform.CenterX = center;
-        SquashTransform.CenterY = size;
-        RotateTransform.CenterX = center;
-        RotateTransform.CenterY = center;
+        // RenderTransformOrigin="0.5,0.5" handles centering automatically
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -207,8 +203,6 @@ public partial class OverlayWindow : Window
         RotateTransform.Angle = _body.Rotation;
         SquashTransform.ScaleX = _body.ScaleX;
         SquashTransform.ScaleY = _body.ScaleY;
-        // Counter-rotate bubble so text stays readable
-        BubbleCounterRotate.Angle = -_body.Rotation;
     }
 
     private void OnMouseDown(object sender, MouseButtonEventArgs e)
