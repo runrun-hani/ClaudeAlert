@@ -24,6 +24,7 @@ public partial class StatusBarWindow : Window
 
         StatusLabel.FontSize = settings.FontSize;
         ElapsedLabel.FontSize = Math.Max(settings.FontSize - 2, 7);
+        DebugPanel.Visibility = settings.DebugLog ? Visibility.Visible : Visibility.Collapsed;
 
         _statusManager.PropertyChanged += (_, args) =>
         {
@@ -62,6 +63,11 @@ public partial class StatusBarWindow : Window
         Top = screenH - 40;
         Show();
         Topmost = true;
+    }
+
+    public void ApplyDebugLog(bool enabled)
+    {
+        DebugPanel.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public void ApplyFontSize(double fontSize)

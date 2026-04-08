@@ -27,8 +27,8 @@
                            FontFamily="Segoe UI"/>
             </StackPanel>
         </Border>
-        <Border Background="#CC000000" CornerRadius="6" Padding="8,4" Margin="4,0,0,0"
-                MaxWidth="350" MaxHeight="200">
+        <Border x:Name="DebugPanel" Background="#CC000000" CornerRadius="6" Padding="8,4" Margin="4,0,0,0"
+                MaxWidth="350" MaxHeight="200" Visibility="Collapsed">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <TextBlock x:Name="DebugLog"
                            Text=""

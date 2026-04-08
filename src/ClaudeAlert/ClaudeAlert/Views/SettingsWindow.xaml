@@ -21,6 +21,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <!-- Title -->
@@ -82,8 +83,12 @@
             <CheckBox x:Name="AutoStartCheck" Grid.Row="5" Content="Windows 시작 시 자동 실행"
                       Foreground="#CCCCCC" FontSize="13" Margin="0,0,0,12"/>
 
+            <!-- Debug log -->
+            <CheckBox x:Name="DebugLogCheck" Grid.Row="6" Content="디버그 로그"
+                      Foreground="#CCCCCC" FontSize="13" Margin="0,0,0,12"/>
+
             <!-- Image -->
-            <StackPanel Grid.Row="6" Margin="0,0,0,12">
+            <StackPanel Grid.Row="7" Margin="0,0,0,12">
                 <TextBlock x:Name="ImageLabel" Text="커스텀 이미지" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,4"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -99,7 +104,7 @@
             </StackPanel>
 
             <!-- Image size slider -->
-            <StackPanel Grid.Row="7" Margin="0,0,0,12">
+            <StackPanel Grid.Row="8" Margin="0,0,0,12">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -115,7 +120,7 @@
             </StackPanel>
 
             <!-- Font size slider -->
-            <StackPanel Grid.Row="8" Margin="0,0,0,12">
+            <StackPanel Grid.Row="9" Margin="0,0,0,12">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -131,7 +136,7 @@
             </StackPanel>
 
             <!-- Save/Cancel -->
-            <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
                 <Button x:Name="CancelButton" Content="취소" Padding="16,6" Margin="0,0,8,0"
                         Background="#3D3D3D" Foreground="White" BorderBrush="#555"
                         Click="OnCancelClick"/>

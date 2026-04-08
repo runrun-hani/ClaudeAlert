@@ -31,6 +31,7 @@ public partial class SettingsWindow : Window
         BounceBox.Text = _settings.EscalationBounceSeconds.ToString();
         SoundCheck.IsChecked = _settings.SoundEnabled;
         AutoStartCheck.IsChecked = AutoStartManager.IsEnabled;
+        DebugLogCheck.IsChecked = _settings.DebugLog;
         ImagePathBox.Text = _settings.CustomImagePath ?? "";
         ImageSizeSlider.Value = _settings.ImageSize;
         ImageSizeValue.Text = $"{_settings.ImageSize}px";
@@ -62,6 +63,7 @@ public partial class SettingsWindow : Window
         BounceLabel.Text = L10n.Get("settings.bounce");
         SoundCheck.Content = L10n.Get("settings.sound");
         AutoStartCheck.Content = L10n.Get("settings.autostart");
+        DebugLogCheck.Content = L10n.Get("settings.debug_log");
         ImageLabel.Text = L10n.Get("settings.custom_image");
         BrowseButton.Content = L10n.Get("settings.browse");
         ImageSizeLabel.Text = L10n.Get("settings.image_size");
@@ -112,6 +114,7 @@ public partial class SettingsWindow : Window
         if (int.TryParse(RollBox.Text, out var roll)) _settings.EscalationRollSeconds = roll;
         if (int.TryParse(BounceBox.Text, out var bounce)) _settings.EscalationBounceSeconds = bounce;
         _settings.SoundEnabled = SoundCheck.IsChecked == true;
+        _settings.DebugLog = DebugLogCheck.IsChecked == true;
         _settings.CustomImagePath = string.IsNullOrWhiteSpace(ImagePathBox.Text) ? null : ImagePathBox.Text;
         _settings.ImageSize = (int)ImageSizeSlider.Value;
         _settings.FontSize = (int)FontSizeSlider.Value;
