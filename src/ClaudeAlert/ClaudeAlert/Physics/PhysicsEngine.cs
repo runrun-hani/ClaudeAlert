@@ -25,28 +25,25 @@ public class PhysicsEngine
     public PhysicsEngine(PhysicsBody body)
     {
         _body = body;
-        // Detect DPI scale: physical pixels / WPF logical units
         using var g = System.Drawing.Graphics.FromHwnd(IntPtr.Zero);
         _dpiScale = g.DpiX / 96.0;
-
         UpdateScreenBounds();
     }
 
     public void UpdateScreenBounds()
     {
-        // Get the monitor that contains the body's current center position
-        // Convert WPF logical coords to physical pixels for Screen.FromPoint
         var centerX = (int)((_body.Position.X + _body.Width / 2) * _dpiScale);
         var centerY = (int)((_body.Position.Y + _body.Height / 2) * _dpiScale);
         var screen = Screen.FromPoint(new System.Drawing.Point(centerX, centerY));
-        var wa = screen.WorkingArea; // physical pixels, excludes taskbar
+        var wa = screen.WorkingArea;
 
-        // Convert physical pixels back to WPF logical units
         _screenLeft = wa.Left / _dpiScale;
         _screenTop = wa.Top / _dpiScale;
         _screenRight = wa.Right / _dpiScale;
         _screenBottom = wa.Bottom / _dpiScale;
         _groundY = _screenBottom - _body.Height;
+        _lastBoundsCheckX = _body.Position.X;
+        _lastBoundsCheckY = _body.Position.Y;
     }
 
     public double GroundY => _groundY;
@@ -63,6 +60,7 @@ public class PhysicsEngine
 
     public void Stop()
     {
+        if (!_running) return;
         _running = false;
         CompositionTarget.Rendering -= OnRendering;
     }
@@ -95,10 +93,10 @@ public class PhysicsEngine
         // Rotation
         _body.Rotation += _body.AngularVelocity * dt;
 
-        // Recalculate screen bounds only when moved significantly (prevents jitter)
+        // Recalculate screen bounds only when moved significantly
         var dx = pos.X - _lastBoundsCheckX;
         var dy = pos.Y - _lastBoundsCheckY;
-        if (dx * dx + dy * dy > 10000) // ~100px distance
+        if (dx * dx + dy * dy > 10000) // ~100px
         {
             _lastBoundsCheckX = pos.X;
             _lastBoundsCheckY = pos.Y;
@@ -118,7 +116,7 @@ public class PhysicsEngine
         {
             pos.Y = _groundY;
             var vy = _body.Velocity.Y;
-            if (Math.Abs(vy) < 30)
+            if (Math.Abs(vy) < 100) // higher threshold to prevent ground oscillation
             {
                 _body.Velocity = new Vector(_body.Velocity.X * _body.Friction, 0);
                 _body.AngularVelocity *= 0.8;
@@ -129,10 +127,12 @@ public class PhysicsEngine
                     _body.Rotation = 0;
                     _body.ScaleX = 1;
                     _body.ScaleY = 1;
+                    Stop(); // stop engine when body is at rest
                 }
             }
             else
             {
+                // Bounce
                 _body.Velocity = new Vector(
                     _body.Velocity.X * _body.Friction,
                     -vy * _body.BounceFactor);
@@ -143,7 +143,7 @@ public class PhysicsEngine
             }
         }
 
-        // Wall collisions (per-monitor bounds)
+        // Wall collisions
         if (pos.X <= _screenLeft)
         {
             pos.X = _screenLeft;

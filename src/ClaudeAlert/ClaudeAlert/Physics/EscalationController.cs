@@ -64,7 +64,6 @@ public class EscalationController
         if (newLevel != _currentLevel)
         {
             _currentLevel = newLevel;
-            _engine.Start(); // ensure physics running
             LevelChanged?.Invoke(_currentLevel);
         }
 
@@ -96,10 +95,10 @@ public class EscalationController
 
     private void DoJump()
     {
-        // Only jump if on ground and not already jumping
         if (_body.IsStatic || Math.Abs(_body.Velocity.Y) < 1)
         {
             _body.ApplyImpulse(new Vector(0, -350 - _random.Next(100)));
+            _engine.Start();
         }
     }
 
@@ -117,6 +116,7 @@ public class EscalationController
 
             _body.ApplyImpulse(new Vector(_rollDirection * 200, -100));
             _body.AngularVelocity = _rollDirection * 360;
+            _engine.Start();
         }
     }
 
@@ -131,6 +131,7 @@ public class EscalationController
             _body.AngularVelocity = (_random.NextDouble() - 0.5) * 1440;
             _body.Gravity = 300;
             _body.BounceFactor = 0.92;
+            _engine.Start();
         }
     }
 
