@@ -115,6 +115,11 @@ dotnet build -c Release
 dotnet run --project src/ClaudeAlert/ClaudeAlert
 ```
 
+## 주요 클래스 이름 참고
+
+- `L10n` (Localization의 약칭): 다국어 문자열 관리. `System.Windows.Localization`과 이름 충돌 방지를 위해 축약.
+
 ## 최근 변경 이력
 
+- **v1.1.0**: 아키텍처 개선 — 이미지/텍스트 분리, 말풍선, 다국어, 크기 조정, 자동 Acknowledge
 - **v1.0.0**: 초기 릴리스
