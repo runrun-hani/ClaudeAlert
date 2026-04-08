@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using ClaudeAlert.Core;
 using ClaudeAlert.Physics;
 using ClaudeAlert.Setup;
@@ -24,6 +25,8 @@ public partial class OverlayWindow : Window
     private bool _isDragging;
     private Point _dragStartMouse;
     private Point _dragStartPos;
+    private readonly DispatcherTimer _bubbleHideTimer;
+    private readonly DispatcherTimer _bubbleReshowTimer;
 
     [DllImport("user32.dll")]
     private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
@@ -53,6 +56,16 @@ public partial class OverlayWindow : Window
 
         _engine = new PhysicsEngine(_body);
         _escalation = new EscalationController(_body, _engine, statusManager, settings);
+
+        _bubbleHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _bubbleHideTimer.Tick += (_, _) => { HideBubble(); _bubbleHideTimer.Stop(); };
+
+        _bubbleReshowTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(15) };
+        _bubbleReshowTimer.Tick += (_, _) =>
+        {
+            if (_statusManager.IsEscalating && _escalation.CurrentLevel != EscalationLevel.Bounce)
+                ShowBubbleForState(_statusManager.CurrentState);
+        };
 
         _engine.Updated += OnPhysicsUpdated;
         _statusManager.StateChanged += OnStateChanged;
@@ -158,14 +171,53 @@ public partial class OverlayWindow : Window
     {
         Dispatcher.InvokeAsync(() =>
         {
+            ShowBubbleForState(newState);
+
             if (newState == ClaudeState.Acknowledged)
             {
                 _escalation.Reset();
                 _body.Position = new Point(_body.Position.X, _engine.GroundY);
                 _body.MakeStatic();
                 SyncWindowToBody();
+                _bubbleReshowTimer.Stop();
+            }
+            else if (_statusManager.IsEscalating)
+            {
+                _bubbleReshowTimer.Start();
+            }
+            else
+            {
+                _bubbleReshowTimer.Stop();
             }
         });
+    }
+
+    private void ShowBubbleForState(ClaudeState state)
+    {
+        var key = state switch
+        {
+            ClaudeState.Idle => "bubble.idle",
+            ClaudeState.Active => "bubble.active",
+            ClaudeState.Done => "bubble.done",
+            ClaudeState.WaitingForInput => "bubble.waiting",
+            ClaudeState.Stuck => "bubble.stuck",
+            ClaudeState.Error => "bubble.error",
+            ClaudeState.Acknowledged => "bubble.acknowledged",
+            _ => null
+        };
+        if (key == null) return;
+
+        BubbleText.Text = L10n.Get(key);
+        SpeechBubble.Visibility = Visibility.Visible;
+        BubbleTail.Visibility = Visibility.Visible;
+        _bubbleHideTimer.Stop();
+        _bubbleHideTimer.Start();
+    }
+
+    private void HideBubble()
+    {
+        SpeechBubble.Visibility = Visibility.Collapsed;
+        BubbleTail.Visibility = Visibility.Collapsed;
     }
 
     private void OnPhysicsUpdated()
@@ -180,6 +232,8 @@ public partial class OverlayWindow : Window
         RotateTransform.Angle = _body.Rotation;
         SquashTransform.ScaleX = _body.ScaleX;
         SquashTransform.ScaleY = _body.ScaleY;
+        // Counter-rotate bubble so text stays readable
+        BubbleCounterRotate.Angle = -_body.Rotation;
     }
 
     private void OnMouseDown(object sender, MouseButtonEventArgs e)
