@@ -38,5 +38,13 @@
                            TextWrapping="Wrap"/>
             </ScrollViewer>
         </Border>
+        <Border x:Name="FocusPanel" Background="#CC000000" CornerRadius="6" Padding="8,4" Margin="4,0,0,0"
+                Visibility="Collapsed">
+            <TextBlock x:Name="FocusStatus"
+                       Text="Focus: ?"
+                       Foreground="#88AAFF"
+                       FontSize="9"
+                       FontFamily="Consolas"/>
+        </Border>
     </StackPanel>
 </Window>

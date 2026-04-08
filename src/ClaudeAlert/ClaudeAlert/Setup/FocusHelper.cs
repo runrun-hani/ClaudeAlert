@@ -41,6 +41,19 @@ public static class FocusHelper
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder text, int count);
 
+    public static string GetForegroundWindowTitle()
+    {
+        try
+        {
+            var fgWnd = GetForegroundWindow();
+            if (fgWnd == IntPtr.Zero) return "(none)";
+            var sb = new System.Text.StringBuilder(256);
+            GetWindowText(fgWnd, sb, 256);
+            return sb.ToString();
+        }
+        catch { return "(error)"; }
+    }
+
     public static bool IsClaudeCodeFocused()
     {
         try

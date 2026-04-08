@@ -98,12 +98,16 @@ public partial class App : Application
 
         // Auto-acknowledge: if user is in Claude Code and escalation
         // has been running for 10+ seconds, they've seen the alert
-        var focusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        var focusTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         focusTimer.Tick += (_, _) =>
         {
+            var isFocused = FocusHelper.IsClaudeCodeFocused();
+            var title = FocusHelper.GetForegroundWindowTitle();
+            _statusBar?.UpdateFocusStatus(isFocused, title);
+
             if (statusManager.IsEscalating &&
                 statusManager.EscalationElapsed.TotalSeconds >= 10 &&
-                FocusHelper.IsClaudeCodeFocused())
+                isFocused)
             {
                 _statusBar?.AddDebugLog("AUTO-ACK: 10s + Claude focused");
                 statusManager.Acknowledge();
