@@ -97,6 +97,10 @@ public class ClaudeStatusManager : INotifyPropertyChanged
         if ((DateTime.UtcNow - _acknowledgeTime).TotalSeconds < 5)
             return;
 
+        // If user is looking at Claude Code, ignore all events — stay Idle
+        if (Setup.FocusHelper.IsClaudeCodeFocused())
+            return;
+
         switch (evt.Type)
         {
             case "tool_use":
@@ -104,20 +108,16 @@ public class ClaudeStatusManager : INotifyPropertyChanged
                 CurrentState = ClaudeState.Active;
                 break;
             case "stop":
+                StartEscalation();
                 CurrentState = ClaudeState.Done;
-                // Only alert if user is NOT looking at Claude Code
-                if (!Setup.FocusHelper.IsClaudeCodeFocused())
-                    StartEscalation();
                 break;
             case "permission_prompt":
+                StartEscalation();
                 CurrentState = ClaudeState.WaitingForInput;
-                if (!Setup.FocusHelper.IsClaudeCodeFocused())
-                    StartEscalation();
                 break;
             case "idle_prompt":
+                StartEscalation();
                 CurrentState = ClaudeState.WaitingForInput;
-                if (!Setup.FocusHelper.IsClaudeCodeFocused())
-                    StartEscalation();
                 break;
             case "user_active":
                 if (IsEscalating)
