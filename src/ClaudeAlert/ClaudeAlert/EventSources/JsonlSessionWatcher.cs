@@ -140,21 +140,20 @@ public class JsonlSessionWatcher : IClaudeEventSource
 
             var type = typeProp.GetString();
 
+            // Any new JSONL activity = cancel permission wait timer
+            CancelPermissionTimer();
+
             switch (type)
             {
                 case "assistant":
                     ProcessAssistantMessage(root);
                     break;
                 case "tool_result":
-                    // Tool executed — cancel permission timer, stay in current state
-                    CancelPermissionTimer();
                     CheckToolResultForErrors(root);
                     break;
                 case "system":
                     ProcessSystemMessage(root);
                     break;
-                // "user" messages intentionally ignored —
-                // Claude working is only detected from "assistant" messages
             }
         }
         catch { }
@@ -189,7 +188,7 @@ public class JsonlSessionWatcher : IClaudeEventSource
     private void StartPermissionTimer()
     {
         CancelPermissionTimer();
-        _permissionTimer = new System.Timers.Timer(3000) { AutoReset = false };
+        _permissionTimer = new System.Timers.Timer(8000) { AutoReset = false };
         _permissionTimer.Elapsed += (_, _) =>
         {
             OnEvent?.Invoke(ClaudeEvent.Now("permission_prompt"));
