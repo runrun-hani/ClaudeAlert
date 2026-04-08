@@ -41,13 +41,13 @@ public class ClaudeStatusManager : INotifyPropertyChanged
 
     public string StatusText => CurrentState switch
     {
-        ClaudeState.Idle => "대기",
-        ClaudeState.Active => "작업 중",
-        ClaudeState.Done => "완료",
-        ClaudeState.WaitingForInput => "입력 대기",
-        ClaudeState.Stuck => "멈춤",
-        ClaudeState.Error => "오류",
-        ClaudeState.Acknowledged => "확인됨",
+        ClaudeState.Idle => L10n.Get("status.idle"),
+        ClaudeState.Active => L10n.Get("status.active"),
+        ClaudeState.Done => L10n.Get("status.done"),
+        ClaudeState.WaitingForInput => L10n.Get("status.waiting"),
+        ClaudeState.Stuck => L10n.Get("status.stuck"),
+        ClaudeState.Error => L10n.Get("status.error"),
+        ClaudeState.Acknowledged => L10n.Get("status.acknowledged"),
         _ => ""
     };
 
@@ -56,17 +56,18 @@ public class ClaudeStatusManager : INotifyPropertyChanged
         get
         {
             var elapsed = DateTime.UtcNow - _lastStateChangeTime;
-            return CurrentState == ClaudeState.Active
-                ? FormatElapsed(elapsed, "째")
-                : FormatElapsed(elapsed, " 지남");
+            var suffix = CurrentState == ClaudeState.Active
+                ? L10n.Get("elapsed.suffix.active")
+                : L10n.Get("elapsed.suffix.idle");
+            return FormatElapsed(elapsed, suffix);
         }
     }
 
     private static string FormatElapsed(TimeSpan ts, string suffix)
     {
-        if (ts.TotalSeconds < 60) return $"{(int)ts.TotalSeconds}초{suffix}";
-        if (ts.TotalMinutes < 60) return $"{(int)ts.TotalMinutes}분{suffix}";
-        return $"{(int)ts.TotalHours}시간{suffix}";
+        if (ts.TotalSeconds < 60) return L10n.Get("elapsed.seconds", (int)ts.TotalSeconds) + suffix;
+        if (ts.TotalMinutes < 60) return L10n.Get("elapsed.minutes", (int)ts.TotalMinutes) + suffix;
+        return L10n.Get("elapsed.hours", (int)ts.TotalHours) + suffix;
     }
 
     public ClaudeStatusManager(AppSettings settings)
@@ -75,6 +76,12 @@ public class ClaudeStatusManager : INotifyPropertyChanged
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _timer.Tick += OnTimerTick;
         _timer.Start();
+
+        L10n.LanguageChanged += () =>
+        {
+            OnPropertyChanged(nameof(StatusText));
+            OnPropertyChanged(nameof(ElapsedText));
+        };
     }
 
     public void ProcessEvent(ClaudeEvent evt)
