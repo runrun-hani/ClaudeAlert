@@ -151,6 +151,10 @@ public class JsonlSessionWatcher : IClaudeEventSource
                 case "tool_result":
                     CheckToolResultForErrors(root);
                     break;
+                case "user":
+                    // User sent a new message → they've seen the alert
+                    OnEvent?.Invoke(ClaudeEvent.Now("user_active"));
+                    break;
                 case "system":
                     ProcessSystemMessage(root);
                     break;

@@ -115,6 +115,11 @@ public class ClaudeStatusManager : INotifyPropertyChanged
                 StartEscalation();
                 CurrentState = ClaudeState.WaitingForInput;
                 break;
+            case "user_active":
+                // User sent a new message → they saw the alert
+                if (IsEscalating)
+                    Acknowledge();
+                break;
             case "error":
                 StartEscalation();
                 CurrentState = ClaudeState.Error;
