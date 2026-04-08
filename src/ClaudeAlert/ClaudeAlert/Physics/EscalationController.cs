@@ -73,7 +73,7 @@ public class EscalationController
         {
             EscalationLevel.Jump => TimeSpan.FromSeconds(2.5),
             EscalationLevel.Roll => TimeSpan.FromSeconds(3),
-            EscalationLevel.Bounce => TimeSpan.FromSeconds(2),
+            EscalationLevel.Bounce => TimeSpan.FromSeconds(1),
             _ => TimeSpan.FromSeconds(1)
         };
         if (now - _lastActionTime < cooldown) return;
@@ -120,9 +120,8 @@ public class EscalationController
         }
     }
 
-    private double _bounceTargetSpeed = 400;
+    private const double BounceAccelForce = 200;
     private const double BounceMaxSpeed = 1200;
-    private const double BounceAccelRate = 200; // speed increase per action
 
     private void DoBounce()
     {
@@ -130,24 +129,25 @@ public class EscalationController
         _body.BounceFactor = 0.92;
         _engine.Start();
 
-        // Gradually increase target speed up to max
-        _bounceTargetSpeed = Math.Min(_bounceTargetSpeed + BounceAccelRate, BounceMaxSpeed);
-
-        var currentSpeed = _body.Velocity.Length;
-        if (_body.IsStatic || currentSpeed < _bounceTargetSpeed)
+        if (_body.IsStatic || _body.Velocity.Length < 10)
         {
+            // Initial kick in random direction
             var angle = _random.NextDouble() * Math.PI * 2;
-            _body.ApplyImpulse(new Vector(
-                Math.Cos(angle) * _bounceTargetSpeed,
-                Math.Sin(angle) * _bounceTargetSpeed - 400));
-            _body.AngularVelocity = (_random.NextDouble() - 0.5) * 1440;
+            _body.ApplyImpulse(new Vector(Math.Cos(angle) * 400, Math.Sin(angle) * 400 - 300));
+            _body.AngularVelocity = (_random.NextDouble() - 0.5) * 720;
+        }
+        else if (_body.Velocity.Length < BounceMaxSpeed)
+        {
+            // Accelerate in current movement direction
+            var dir = _body.Velocity;
+            dir.Normalize();
+            _body.ApplyImpulse(dir * BounceAccelForce);
         }
     }
 
     public void Reset()
     {
         _currentLevel = EscalationLevel.None;
-        _bounceTargetSpeed = 400;
         _body.Gravity = 980;
         _body.BounceFactor = 0.5;
         // Stop in place — don't teleport to ground
