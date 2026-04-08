@@ -1,293 +1,158 @@
 # ClaudeAlert
 
-A delightful Windows desktop application that monitors Claude Code's task status and provides real-time visual feedback through physics-based character animations.
+Claude Code의 작업 상태를 실시간으로 모니터링하고, 물리 기반 캐릭터 애니메이션으로 알려주는 Windows 데스크톱 애플리케이션.
 
-## 🎯 Features
+## 주요 기능
 
-- **Real-time Status Monitoring**: Track Claude Code's work status (Active, Done, Waiting for Input, Stuck, Error, etc.)
-- **Physics-Based Animations**: A cute character responds with jump, roll, and bounce animations based on work state and duration
-- **Escalation System**: Progressive animation intensity increases when tasks take too long (Jump → Roll → Bounce)
-- **Multiple Event Sources**: Monitors via HTTP webhooks, log files, and session tracking
-- **System Tray Integration**: Minimize to tray, quick access to controls
-- **Toast Notifications & Sound Alerts**: Get notified of important state changes
-- **Custom Image Support**: Replace the default character with your own PNG/GIF image
-- **Auto-Configuration**: Automatically sets up Claude Code hooks with zero manual configuration
-- **Fully Customizable**: Adjust timing thresholds, enable/disable sounds, and more
+- **실시간 상태 모니터링** — Claude Code의 작업 상태(작업 중, 완료, 입력 대기, 멈춤, 오류)를 JSONL 세션 파일을 통해 감지
+- **물리 기반 애니메이션** — 캐릭터가 상태에 따라 점프, 굴러가기, 튕기기 등 물리 애니메이션으로 반응
+- **에스컬레이션 시스템** — 응답 대기 시간이 길어질수록 애니메이션이 격렬해짐 (점프 → 굴러가기 → 튕기기)
+- **말풍선** — 상태 변경 시 캐릭터가 짧은 메시지로 현재 상태를 알려줌
+- **자동 Acknowledge** — Claude Code 창을 확인하면 자동으로 알림 중지
+- **다국어 지원** — 한국어/영어 실시간 전환
+- **다중 모니터 지원** — 모니터 간 자유롭게 이동, 모니터별 경계 충돌 처리
+- **커스텀 이미지** — 기본 캐릭터 대신 PNG/GIF 이미지 사용 가능
+- **크기 조정** — 이미지 크기(32~256px), 폰트 크기(8~24pt) 설정
 
-## 🛠 Tech Stack
+## 기술 스택
 
-| Component | Technology |
-|-----------|-----------|
-| **Platform** | .NET 7.0 for Windows |
-| **UI Framework** | WPF (XAML) + Windows Forms |
-| **Physics Engine** | Custom 2D physics simulation (gravity, friction, elasticity) |
-| **Notifications** | Windows Toast Notifications API |
-| **System Integration** | System Tray Icon, Win32 P/Invoke |
-| **Language** | C# (nullable enabled, implicit usings) |
+| 구성 | 기술 |
+|------|------|
+| **플랫폼** | .NET 7.0 for Windows |
+| **UI** | WPF (XAML) + Windows Forms |
+| **물리 엔진** | 자체 2D 물리 시뮬레이션 (중력, 마찰, 반탄성) |
+| **알림** | Windows 토스트 알림 API |
+| **이벤트 감지** | Claude Code JSONL 세션 파일 모니터링 |
 
-### Key Dependencies
+### 의존성
 
-- **Hardcodet.NotifyIcon.Wpf.NetCore** (1.1.5) - WPF system tray icon
-- **Microsoft.Toolkit.Uwp.Notifications** (7.1.3) - Windows toast notifications
-- **WpfAnimatedGif** (2.0.2) - GIF animation support
+- **Hardcodet.NotifyIcon.Wpf.NetCore** (1.1.5) — 시스템 트레이 아이콘
+- **Microsoft.Toolkit.Uwp.Notifications** (7.1.3) — 토스트 알림
+- **WpfAnimatedGif** (2.0.2) — GIF 애니메이션
 
-## 📋 Requirements
+## 요구 사항
 
-- Windows 10/11 or later
-- .NET 7.0 Runtime (or build from source with .NET 7.0 SDK)
-- Claude Code installed and configured
+- Windows 10/11 이상
+- .NET 7.0 런타임 (또는 소스 빌드 시 .NET 7.0 SDK)
+- Claude Code 설치
 
-## 🚀 Installation
+## 설치
 
-### From Release (Recommended)
+### Release 다운로드
 
-1. Download the latest release from [Releases](https://github.com/hllee/ClaudeAlert/releases)
-2. Extract to your preferred location
-3. Run `ClaudeAlert.exe`
-4. The application will automatically configure Claude Code hooks on first launch
+1. [Releases](https://github.com/runrun-hani/ClaudeAlert/releases)에서 최신 버전 다운로드
+2. 원하는 위치에 압축 해제
+3. `ClaudeAlert.exe` 실행
 
-### From Source
+### 소스에서 빌드
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/hllee/ClaudeAlert.git
-   cd ClaudeAlert
-   ```
-
-2. Open the solution in Visual Studio 2022 (or later):
-   ```bash
-   start ClaudeAlert.sln
-   ```
-
-3. Build the solution (Build → Build Solution)
-
-4. Run the application (Debug → Start Debugging or press F5)
-
-## 📖 Usage
-
-### First Launch
-
-1. **Auto-Configuration**: ClaudeAlert automatically adds webhook hooks to your Claude Code configuration:
-   - Adds HTTP POST hooks to `~/.claude/settings.json`
-   - Listens on `localhost:19542/event` for status updates
-
-2. **System Tray**: The application runs in the system tray. Click the icon to:
-   - Show/Hide the overlay window
-   - Access settings
-   - Quit the application
-
-### How It Works
-
-```
-Claude Code Task Started
-         ↓
-HTTP Webhook/Log Monitor detects "tool_use" event
-         ↓
-Status changes to "Active" → Character stands idle
-         ↓
-Task Completes (30s+ with no activity)
-         ↓
-Status changes to "Done" → Character starts jumping
-         ↓
-Still waiting after 60s?
-         ↓
-Character switches to rolling animation
-         ↓
-Still waiting after 180s?
-         ↓
-Character bounces across entire screen
+```bash
+git clone https://github.com/runrun-hani/ClaudeAlert.git
+cd ClaudeAlert
+dotnet build -c Release
+dotnet run --project src/ClaudeAlert/ClaudeAlert
 ```
 
-### Configuration
+## 사용 방법
 
-Settings are saved in:
-```
-%USERPROFILE%\Documents\ClaudeAlert\config.json
-```
+### 동작 원리
 
-Customizable options:
-- **Port**: HTTP webhook listener port (default: 19542)
-- **ImagePath**: Path to custom character image (PNG/GIF)
-- **SoundEnabled**: Enable/disable audio notifications
-- **Thresholds**: Timing for escalation levels (in seconds)
-
-### Status States
-
-| State | Meaning | Animation |
-|-------|---------|-----------|
-| **Idle** | Claude Code is ready | Stands still |
-| **Active** | Processing a task | Stands still (no escalation) |
-| **Done** | Task completed, no follow-up | Jumping (30s+) |
-| **WaitingForInput** | Awaiting user response | Jumping (30s+) |
-| **Stuck** | Active for 120s+ with no updates | Jumping (30s+) |
-| **Error** | An error occurred | Jumping (30s+) |
-| **Acknowledged** | User acknowledged (click on overlay) | Stops animation |
-
-## 🏗 Architecture
-
-### Core Components
+ClaudeAlert는 Claude Code의 JSONL 세션 파일(`~/.claude/projects/`)을 모니터링하여 상태를 감지합니다. Hook이나 설정 파일 수정이 필요 없습니다.
 
 ```
-ClaudeAlert/
-├── Core/
-│   ├── ClaudeStatusManager.cs    - State machine & event orchestration
-│   ├── ClaudeState.cs            - State enum definition
-│   ├── AppSettings.cs            - Configuration management
-│   └── ClaudeEvent.cs            - Event record type
-│
-├── EventSources/
-│   ├── HookHttpListener.cs       - HTTP webhook receiver
-│   ├── LogFileWatcher.cs         - Claude Code log monitor
-│   └── SessionFileMonitor.cs     - Session state tracking
-│
-├── Physics/
-│   ├── PhysicsEngine.cs          - 2D physics simulation
-│   ├── PhysicsBody.cs            - Physics properties
-│   └── EscalationController.cs   - Animation escalation logic
-│
-├── Views/
-│   ├── OverlayWindow.xaml        - Main UI overlay
-│   └── SettingsWindow.xaml       - Settings dialog
-│
-├── Notifications/
-│   ├── ToastNotifier.cs          - Windows notifications
-│   └── SoundManager.cs           - Audio alerts
-│
-└── Setup/
-    ├── HookConfigurator.cs       - Claude Code auto-setup
-    ├── TrayIconManager.cs        - System tray integration
-    ├── AutoStartManager.cs       - Startup registration
-    └── FocusHelper.cs            - Window focus control
+Claude Code 작업 시작
+    ↓
+JSONL 파일에서 "tool_use" 감지 → 상태: 작업 중
+    ↓
+"end_turn" 감지 → 상태: 완료 (에스컬레이션 시작)
+    ↓
+30초 경과 → 캐릭터 점프
+60초 경과 → 캐릭터 굴러가기
+180초 경과 → 캐릭터 격렬하게 튕기기
+    ↓
+사용자가 Claude Code 창 확인 → 자동 Acknowledge (알림 중지)
 ```
 
-### Key Workflows
+### 조작
 
-**Initialization (App.xaml.cs)**
-1. Single-instance check (mutex)
-2. Load AppSettings
-3. Auto-configure Claude Code hooks
-4. Start HTTP listener on localhost:19542
-5. Initialize physics engine
-6. Start monitoring Claude Code events
-7. Register system tray icon
+- **클릭** — Acknowledge (에스컬레이션 중지) 또는 미니 점프
+- **드래그** — 캐릭터 위치 이동 (놓으면 중력 적용)
+- **우클릭** — 설정, 숨기기, 종료 메뉴
+- **트레이 아이콘** — 더블클릭으로 표시, 우클릭으로 메뉴
 
-**State Transitions**
-- `tool_use` event → Status = `Active`
-- `stop` event → Status = `Done` (begins escalation)
-- `permission_prompt` → Status = `WaitingForInput` (begins escalation)
-- No events for 120s in Active state → Status = `Stuck`
-- Error detected in logs → Status = `Error`
+### 설정
 
-**Escalation Timeline**
-- 0-30s: No animation (standing)
-- 30s+: Jump (every 2.5s, 350-450px high)
-- 60s+: Roll (every 3s, left-right movement)
-- 180s+: Bounce (every 4s, full-screen bouncing)
+설정 파일 위치: `%DOCUMENTS%/ClaudeAlert/config.json`
 
-## 🎮 Interaction
+| 항목 | 설명 | 기본값 |
+|------|------|--------|
+| StuckThresholdSeconds | 멈춤 감지 시간 (초) | 120 |
+| EscalationJumpSeconds | 점프 시작 시간 | 30 |
+| EscalationRollSeconds | 굴러가기 시작 시간 | 60 |
+| EscalationBounceSeconds | 튕기기 시작 시간 | 180 |
+| SoundEnabled | 소리 알림 | true |
+| ImageSize | 캐릭터 이미지 크기 (px) | 64 |
+| FontSize | 상태 텍스트 폰트 크기 (pt) | 10 |
+| Language | 언어 (Korean/English) | Korean |
+| CustomImagePath | 커스텀 이미지 경로 | null |
 
-### Overlay Window
-- **Click**: Acknowledge the current state (stops animation)
-- **Drag**: Move the overlay window to any location
-- **Right-click**: Open context menu (settings, close)
+### 상태
 
-### Keyboard Shortcuts (Future)
-- `Ctrl+Alt+C`: Toggle overlay visibility
-- `Esc`: Hide overlay
+| 상태 | 의미 | 트리거 |
+|------|------|--------|
+| 대기 | Claude Code 대기 중 | 초기 상태 |
+| 작업 중 | 도구 사용 중 | JSONL에서 tool_use 감지 |
+| 완료 | 작업 완료 | JSONL에서 end_turn 감지 |
+| 입력 대기 | 사용자 입력 필요 | permission_prompt 감지 |
+| 멈춤 | 오래 응답 없음 | Active 상태 120초+ |
+| 오류 | 에러 발생 | error 패턴 감지 |
+| 확인됨 | 사용자가 확인 | 클릭 또는 Claude Code 포커스 |
 
-## 📊 Event Sources
+## 아키텍처
 
-ClaudeAlert monitors Claude Code through multiple channels:
+```
+src/ClaudeAlert/ClaudeAlert/
+├── Core/                    # 핵심 로직
+│   ├── ClaudeStatusManager  # 상태 머신
+│   ├── AppSettings          # JSON 설정 관리
+│   └── L10n                 # 다국어 시스템
+├── EventSources/            # 이벤트 감지
+│   ├── JsonlSessionWatcher  # JSONL 세션 파일 모니터링 (주 이벤트 소스)
+│   ├── LogFileWatcher       # 로그 파일 에러 감지 (보조)
+│   └── SessionFileMonitor   # 세션 상태 추적
+├── Physics/                 # 물리 엔진
+│   ├── PhysicsEngine        # 2D 물리 시뮬레이션
+│   ├── PhysicsBody          # 물리 속성
+│   └── EscalationController # 에스컬레이션 단계 관리
+├── Views/                   # UI
+│   ├── OverlayWindow        # 캐릭터 + 말풍선 (물리 애니메이션)
+│   ├── StatusBarWindow      # 상태 텍스트 (고정 위치)
+│   └── SettingsWindow       # 설정 창
+├── Notifications/           # 알림
+│   ├── ToastNotifier        # Windows 토스트
+│   └── SoundManager         # 사운드
+├── TrayIcon/                # 시스템 트레이
+│   └── TrayIconManager
+└── Setup/                   # 초기화
+    ├── FocusHelper          # Claude Code 포커스 감지
+    └── AutoStartManager     # 자동 시작
+```
 
-1. **HTTP Webhook** (Primary)
-   - POST requests to `localhost:19542/event`
-   - Events: `tool_use`, `stop`, `permission_prompt`, `idle_prompt`
+## 기여
 
-2. **Log File Monitoring** (Secondary)
-   - Watches Claude Code log for `[error]` and `[fatal]` patterns
-   - Triggers Error state on detection
+1. 이슈 등록: 버그 리포트, 기능 제안
+2. Pull Request:
+   - Fork → 브랜치 생성 → 커밋 → PR
+   - [CONTRIBUTING.md](CONTRIBUTING.md) 참고
 
-3. **Session File Monitoring** (Tertiary)
-   - Tracks active session changes
+## 라이선스
 
-## 🐛 Troubleshooting
+MIT License — [LICENSE](LICENSE) 참고
 
-### Application doesn't detect Claude Code events
+## 로드맵
 
-1. Check if Claude Code is running
-2. Verify HTTP listener is active (check Windows Firewall settings)
-3. Manually add hooks to `~/.claude/settings.json`:
-   ```json
-   {
-     "hooks": {
-       "stop": "curl -X POST http://localhost:19542/event -H 'Content-Type: application/json' -d '{\"type\":\"stop\"}'"
-     }
-   }
-   ```
-
-### Custom image not loading
-
-1. Verify image path exists in `config.json`
-2. Supported formats: PNG, GIF (animated)
-3. Recommended size: 100x100 to 200x200 pixels
-4. Try absolute path instead of relative path
-
-### Application crashes on startup
-
-1. Ensure .NET 7.0 Runtime is installed
-2. Check if another instance is already running
-3. Delete `%USERPROFILE%\Documents\ClaudeAlert\config.json` and restart
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. **Report Bugs**: Open an issue with:
-   - Windows version
-   - .NET Runtime version
-   - Steps to reproduce
-   - Expected vs actual behavior
-
-2. **Suggest Features**: Describe your idea and use case
-
-3. **Submit Pull Requests**:
-   - Fork the repository
-   - Create a feature branch (`git checkout -b feature/amazing-feature`)
-   - Commit your changes (`git commit -m 'Add amazing feature'`)
-   - Push to your branch (`git push origin feature/amazing-feature`)
-   - Open a Pull Request
-
-Please ensure code follows existing style conventions and includes appropriate comments.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-**TL;DR**: You can use, modify, and distribute this software freely, including for commercial purposes, as long as you include the original license notice.
-
-## 🙏 Acknowledgments
-
-- Built with [WPF](https://docs.microsoft.com/en-us/dotnet/desktop/wpf/) and [.NET 7.0](https://dotnet.microsoft.com/)
-- Physics simulation inspired by game development practices
-- Special thanks to the Claude Code community for feedback and ideas
-
-## 📞 Support
-
-- **Issues & Bug Reports**: [GitHub Issues](https://github.com/hllee/ClaudeAlert/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/hllee/ClaudeAlert/discussions)
-- **Email**: Open an issue on GitHub for quickest response
-
-## 🔮 Roadmap
-
-- [ ] Customizable animation presets (jumping styles, speeds)
-- [ ] Discord/Slack notifications for remote monitoring
-- [ ] Multi-monitor support improvements
-- [ ] Custom sound effects/alerts
-- [ ] Statistics dashboard (task duration, frequency)
-- [ ] Dark mode for overlay
-- [ ] Keyboard shortcuts configuration
-- [ ] Cross-platform support (macOS, Linux) - in research phase
-
----
-
-**Enjoy monitoring your Claude Code tasks with ClaudeAlert!** 🎉
+- [ ] 커스텀 애니메이션 프리셋
+- [ ] Discord/Slack 알림 연동
+- [ ] 커스텀 사운드 지원
+- [ ] 작업 통계 대시보드
+- [ ] macOS/Linux 지원 (연구 중)

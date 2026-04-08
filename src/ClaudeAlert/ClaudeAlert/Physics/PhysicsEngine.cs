@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Media;
 
 namespace ClaudeAlert.Physics;
@@ -7,10 +8,10 @@ public class PhysicsEngine
 {
     private readonly PhysicsBody _body;
     private double _groundY;
-    private double _screenWidth;
-    private double _screenHeight;
     private double _screenLeft;
     private double _screenTop;
+    private double _screenRight;
+    private double _screenBottom;
     private bool _running;
     private DateTime _lastFrame;
 
@@ -26,12 +27,17 @@ public class PhysicsEngine
 
     public void UpdateScreenBounds()
     {
-        _screenWidth = SystemParameters.VirtualScreenWidth;
-        _screenHeight = SystemParameters.VirtualScreenHeight;
-        _screenLeft = SystemParameters.VirtualScreenLeft;
-        _screenTop = SystemParameters.VirtualScreenTop;
-        // Ground = top of taskbar (approx 48px from bottom)
-        _groundY = _screenTop + _screenHeight - 48 - _body.Height;
+        // Get the monitor that contains the body's current center position
+        var centerX = (int)(_body.Position.X + _body.Width / 2);
+        var centerY = (int)(_body.Position.Y + _body.Height / 2);
+        var screen = Screen.FromPoint(new System.Drawing.Point(centerX, centerY));
+        var wa = screen.WorkingArea; // excludes taskbar
+
+        _screenLeft = wa.Left;
+        _screenTop = wa.Top;
+        _screenRight = wa.Right;
+        _screenBottom = wa.Bottom;
+        _groundY = wa.Bottom - _body.Height;
     }
 
     public double GroundY => _groundY;
@@ -56,7 +62,7 @@ public class PhysicsEngine
         var dt = (now - _lastFrame).TotalSeconds;
         _lastFrame = now;
 
-        if (dt > 0.1) dt = 0.1; // clamp large gaps
+        if (dt > 0.1) dt = 0.1;
         if (_body.IsStatic || _body.IsDragging) return;
 
         Step(dt);
@@ -78,6 +84,17 @@ public class PhysicsEngine
         // Rotation
         _body.Rotation += _body.AngularVelocity * dt;
 
+        // Recalculate screen bounds based on current position (handles monitor transitions)
+        var centerX = (int)(pos.X + _body.Width / 2);
+        var centerY = (int)(pos.Y + _body.Height / 2);
+        var screen = Screen.FromPoint(new System.Drawing.Point(centerX, centerY));
+        var wa = screen.WorkingArea;
+        _screenLeft = wa.Left;
+        _screenTop = wa.Top;
+        _screenRight = wa.Right;
+        _screenBottom = wa.Bottom;
+        _groundY = wa.Bottom - _body.Height;
+
         // Ground collision
         if (pos.Y >= _groundY)
         {
@@ -85,11 +102,9 @@ public class PhysicsEngine
             var vy = _body.Velocity.Y;
             if (Math.Abs(vy) < 30)
             {
-                // Come to rest
                 _body.Velocity = new Vector(_body.Velocity.X * _body.Friction, 0);
                 _body.AngularVelocity *= 0.8;
 
-                // Stop if nearly still
                 if (Math.Abs(_body.Velocity.X) < 5 && Math.Abs(_body.AngularVelocity) < 1)
                 {
                     _body.MakeStatic();
@@ -100,27 +115,25 @@ public class PhysicsEngine
             }
             else
             {
-                // Bounce
                 _body.Velocity = new Vector(
                     _body.Velocity.X * _body.Friction,
                     -vy * _body.BounceFactor);
 
-                // Squash on impact
                 var squash = Math.Min(0.3, Math.Abs(vy) / 2000.0);
                 _body.ScaleY = 1.0 - squash;
                 _body.ScaleX = 1.0 + squash * 0.5;
             }
         }
 
-        // Wall collisions (virtual screen bounds for multi-monitor)
+        // Wall collisions (per-monitor bounds)
         if (pos.X <= _screenLeft)
         {
             pos.X = _screenLeft;
             _body.Velocity = new Vector(-_body.Velocity.X * _body.BounceFactor, _body.Velocity.Y);
         }
-        else if (pos.X + _body.Width >= _screenLeft + _screenWidth)
+        else if (pos.X + _body.Width >= _screenRight)
         {
-            pos.X = _screenLeft + _screenWidth - _body.Width;
+            pos.X = _screenRight - _body.Width;
             _body.Velocity = new Vector(-_body.Velocity.X * _body.BounceFactor, _body.Velocity.Y);
         }
 
@@ -133,11 +146,10 @@ public class PhysicsEngine
 
         _body.Position = pos;
 
-        // Recover squash - lerp back to 1.0
+        // Recover squash
         var recovery = _body.SquashRecoverySpeed * dt;
         _body.ScaleY += (1.0 - _body.ScaleY) * Math.Min(recovery, 1.0);
         _body.ScaleX += (1.0 - _body.ScaleX) * Math.Min(recovery, 1.0);
-        // Snap to 1.0 when close enough
         if (Math.Abs(_body.ScaleY - 1.0) < 0.01) _body.ScaleY = 1.0;
         if (Math.Abs(_body.ScaleX - 1.0) < 0.01) _body.ScaleX = 1.0;
     }

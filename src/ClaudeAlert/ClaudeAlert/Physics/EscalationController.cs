@@ -105,14 +105,17 @@ public class EscalationController
 
     private void DoRoll()
     {
-        // Roll along taskbar
+        // Roll along taskbar (use current monitor bounds from engine)
         if (_body.IsStatic || Math.Abs(_body.Velocity.X) < 10)
         {
-            var screenLeft = SystemParameters.VirtualScreenLeft;
-            var screenRight = screenLeft + SystemParameters.VirtualScreenWidth;
-            // Reverse at edges
-            if (_body.Position.X <= screenLeft + 10) _rollDirection = 1;
-            else if (_body.Right >= screenRight - 10) _rollDirection = -1;
+            var centerX = (int)(_body.Position.X + _body.Width / 2);
+            var centerY = (int)(_body.Position.Y + _body.Height / 2);
+            var screen = System.Windows.Forms.Screen.FromPoint(
+                new System.Drawing.Point(centerX, centerY));
+            var wa = screen.WorkingArea;
+
+            if (_body.Position.X <= wa.Left + 10) _rollDirection = 1;
+            else if (_body.Right >= wa.Right - 10) _rollDirection = -1;
 
             _body.ApplyImpulse(new Vector(_rollDirection * 200, -100));
             _body.AngularVelocity = _rollDirection * 360;
