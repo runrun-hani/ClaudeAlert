@@ -18,6 +18,7 @@ public partial class App : Application
     private SessionFileMonitor? _sessionMonitor;
     private TrayIconManager? _trayManager;
     private OverlayWindow? _overlay;
+    private StatusBarWindow? _statusBar;
 
     private void OnStartup(object sender, StartupEventArgs e)
     {
@@ -25,13 +26,16 @@ public partial class App : Application
         _mutex = new Mutex(true, "ClaudeAlert_SingleInstance", out bool created);
         if (!created)
         {
-            MessageBox.Show("ClaudeAlert가 이미 실행 중입니다.", "ClaudeAlert");
+            MessageBox.Show(L10n.Get("app.already_running"), "ClaudeAlert");
             Shutdown();
             return;
         }
 
         var settings = AppSettings.Load();
         settings.Save(); // ensure dirs exist
+
+        // Initialize localization
+        L10n.SetLanguage(settings.Language);
 
         // Auto-configure Claude Code hooks
         if (!HookConfigurator.IsConfigured(settings.Port))
@@ -50,9 +54,13 @@ public partial class App : Application
         };
         _ = _listener.StartAsync(_cts.Token);
 
-        // Overlay window
+        // Overlay window (character only)
         _overlay = new OverlayWindow(statusManager, settings);
         _overlay.Show();
+
+        // Status bar window (fixed position text)
+        _statusBar = new StatusBarWindow(statusManager, settings);
+        _statusBar.Show();
 
         // Toast notifications
         var toastNotifier = new ToastNotifier();
@@ -61,16 +69,16 @@ public partial class App : Application
             switch (newState)
             {
                 case ClaudeState.Done:
-                    toastNotifier.Show("Claude 응답 완료", "Claude가 작업을 마쳤습니다.");
+                    toastNotifier.Show(L10n.Get("toast.done.title"), L10n.Get("toast.done.body"));
                     break;
                 case ClaudeState.WaitingForInput:
-                    toastNotifier.Show("입력 필요", "Claude가 사용자의 입력을 기다리고 있습니다.");
+                    toastNotifier.Show(L10n.Get("toast.waiting.title"), L10n.Get("toast.waiting.body"));
                     break;
                 case ClaudeState.Stuck:
-                    toastNotifier.Show("Claude 멈춤", "Claude가 오랫동안 응답하지 않고 있습니다.");
+                    toastNotifier.Show(L10n.Get("toast.stuck.title"), L10n.Get("toast.stuck.body"));
                     break;
                 case ClaudeState.Error:
-                    toastNotifier.Show("오류 발생", "Claude에서 오류가 감지되었습니다.");
+                    toastNotifier.Show(L10n.Get("toast.error.title"), L10n.Get("toast.error.body"));
                     break;
             }
         };
@@ -98,7 +106,7 @@ public partial class App : Application
         _ = _sessionMonitor.StartAsync(_cts.Token);
 
         // System tray
-        _trayManager = new TrayIconManager(statusManager, _overlay);
+        _trayManager = new TrayIconManager(statusManager, _overlay, _statusBar);
     }
 
     protected override void OnExit(ExitEventArgs e)

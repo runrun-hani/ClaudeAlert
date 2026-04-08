@@ -20,6 +20,7 @@ public partial class OverlayWindow : Window
     private readonly PhysicsEngine _engine;
     private readonly EscalationController _escalation;
     private readonly ClaudeStatusManager _statusManager;
+    private readonly AppSettings _settings;
     private bool _isDragging;
     private Point _dragStartMouse;
     private Point _dragStartPos;
@@ -35,31 +36,25 @@ public partial class OverlayWindow : Window
     {
         InitializeComponent();
         _statusManager = statusManager;
+        _settings = settings;
+
+        var imgSize = settings.ImageSize;
+        ApplyImageSize(imgSize);
 
         var screenW = SystemParameters.PrimaryScreenWidth;
         var screenH = SystemParameters.PrimaryScreenHeight;
 
         _body = new PhysicsBody
         {
-            Width = 80,
-            Height = 100,
-            Position = new Point(screenW / 2 - 40, screenH - 48 - 100)
+            Width = imgSize,
+            Height = imgSize,
+            Position = new Point(screenW / 2 - imgSize / 2.0, screenH - 48 - imgSize)
         };
 
         _engine = new PhysicsEngine(_body);
         _escalation = new EscalationController(_body, _engine, statusManager, settings);
 
         _engine.Updated += OnPhysicsUpdated;
-        _statusManager.PropertyChanged += (_, args) =>
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                if (args.PropertyName == nameof(ClaudeStatusManager.StatusText))
-                    StatusLabel.Text = _statusManager.StatusText;
-                if (args.PropertyName == nameof(ClaudeStatusManager.ElapsedText))
-                    ElapsedLabel.Text = _statusManager.ElapsedText;
-            });
-        };
         _statusManager.StateChanged += OnStateChanged;
 
         MouseLeftButtonDown += OnMouseDown;
@@ -74,6 +69,17 @@ public partial class OverlayWindow : Window
 
     public EscalationController Escalation => _escalation;
 
+    private void ApplyImageSize(int size)
+    {
+        PetImage.Width = size;
+        PetImage.Height = size;
+        var center = size / 2.0;
+        SquashTransform.CenterX = center;
+        SquashTransform.CenterY = size;
+        RotateTransform.CenterX = center;
+        RotateTransform.CenterY = center;
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         var hwnd = new WindowInteropHelper(this).Handle;
@@ -85,31 +91,37 @@ public partial class OverlayWindow : Window
     {
         try
         {
-            var settings = AppSettings.Load();
-            if (!string.IsNullOrEmpty(settings.CustomImagePath) && System.IO.File.Exists(settings.CustomImagePath))
+            if (!string.IsNullOrEmpty(_settings.CustomImagePath) && System.IO.File.Exists(_settings.CustomImagePath))
             {
-                LoadImage(settings.CustomImagePath);
+                LoadImage(_settings.CustomImagePath);
                 return;
             }
 
             // Default placeholder: blue circle with face
+            var size = _settings.ImageSize;
             var dv = new DrawingVisual();
             using (var dc = dv.RenderOpen())
             {
+                var r = size / 2.0 - 2;
+                var cx = size / 2.0;
+                var cy = size / 2.0;
                 dc.DrawEllipse(
                     new LinearGradientBrush(
                         Color.FromRgb(100, 180, 255),
                         Color.FromRgb(60, 120, 200), 90),
                     new Pen(Brushes.White, 2),
-                    new Point(32, 32), 30, 30);
-                dc.DrawEllipse(Brushes.White, null, new Point(24, 26), 4, 5);
-                dc.DrawEllipse(Brushes.White, null, new Point(40, 26), 4, 5);
-                dc.DrawEllipse(Brushes.Black, null, new Point(24, 27), 2, 3);
-                dc.DrawEllipse(Brushes.Black, null, new Point(40, 27), 2, 3);
+                    new Point(cx, cy), r, r);
+                var eyeOffX = size * 0.125;
+                var eyeY = cy - size * 0.06;
+                dc.DrawEllipse(Brushes.White, null, new Point(cx - eyeOffX, eyeY), size * 0.06, size * 0.08);
+                dc.DrawEllipse(Brushes.White, null, new Point(cx + eyeOffX, eyeY), size * 0.06, size * 0.08);
+                dc.DrawEllipse(Brushes.Black, null, new Point(cx - eyeOffX, eyeY + 1), size * 0.03, size * 0.05);
+                dc.DrawEllipse(Brushes.Black, null, new Point(cx + eyeOffX, eyeY + 1), size * 0.03, size * 0.05);
+                var mouthY = cy + size * 0.1;
                 dc.DrawGeometry(null, new Pen(Brushes.White, 1.5),
-                    Geometry.Parse("M 24,38 Q 32,46 40,38"));
+                    Geometry.Parse($"M {cx - eyeOffX},{mouthY} Q {cx},{mouthY + size * 0.12} {cx + eyeOffX},{mouthY}"));
             }
-            var bmp = new RenderTargetBitmap(64, 64, 96, 96, PixelFormats.Pbgra32);
+            var bmp = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
             bmp.Render(dv);
             PetImage.Source = bmp;
         }
@@ -130,6 +142,16 @@ public partial class OverlayWindow : Window
             }
         }
         catch { }
+    }
+
+    public void ApplySettings()
+    {
+        var size = _settings.ImageSize;
+        ApplyImageSize(size);
+        _body.Width = size;
+        _body.Height = size;
+        _engine.UpdateScreenBounds();
+        LoadDefaultImage();
     }
 
     private void OnStateChanged(ClaudeState oldState, ClaudeState newState)
@@ -184,16 +206,14 @@ public partial class OverlayWindow : Window
 
     private void OnMouseUp(object sender, MouseButtonEventArgs e)
     {
-        var wasDragging = _isDragging;
         _isDragging = false;
         _body.IsDragging = false;
         ReleaseMouseCapture();
 
-        // Check if it was a click (not a drag)
         var currentMouse = PointToScreen(e.GetPosition(this));
         var moved = (currentMouse - _dragStartMouse).Length;
 
-        if (moved < 5) // it was a click, not a drag
+        if (moved < 5) // click
         {
             if (_statusManager.IsEscalating)
             {
@@ -205,9 +225,8 @@ public partial class OverlayWindow : Window
                 _escalation.MiniJump();
             }
         }
-        else
+        else // drag release
         {
-            // It was a drag - drop with gravity
             _body.IsStatic = false;
             _engine.Start();
         }
@@ -218,26 +237,30 @@ public partial class OverlayWindow : Window
     {
         var menu = new ContextMenu();
 
-        var settingsItem = new MenuItem { Header = "설정" };
+        var settingsItem = new MenuItem { Header = L10n.Get("menu.settings") };
         settingsItem.Click += (_, _) =>
         {
             var settings = AppSettings.Load();
             var win = new SettingsWindow(settings, () =>
             {
-                if (!string.IsNullOrEmpty(settings.CustomImagePath))
-                    LoadImage(settings.CustomImagePath);
+                // Reload settings into this instance
+                _settings.ImageSize = settings.ImageSize;
+                _settings.FontSize = settings.FontSize;
+                _settings.Language = settings.Language;
+                _settings.CustomImagePath = settings.CustomImagePath;
+                ApplySettings();
             });
             win.ShowDialog();
         };
         menu.Items.Add(settingsItem);
 
-        var hideItem = new MenuItem { Header = "숨기기" };
+        var hideItem = new MenuItem { Header = L10n.Get("menu.hide") };
         hideItem.Click += (_, _) => Hide();
         menu.Items.Add(hideItem);
 
         menu.Items.Add(new Separator());
 
-        var exitItem = new MenuItem { Header = "종료" };
+        var exitItem = new MenuItem { Header = L10n.Get("menu.exit") };
         exitItem.Click += (_, _) => Application.Current.Shutdown();
         menu.Items.Add(exitItem);
 
