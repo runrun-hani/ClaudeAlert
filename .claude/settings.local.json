@@ -18,7 +18,18 @@
       "Bash(handle \"ClaudeAlert.exe\")",
       "Bash(ls -lt ~/.claude/projects/C--Users-hllee-OneDrive----Claude-Projects-ClaudeAlert/*.jsonl)",
       "Bash(taskkill /f /im ClaudeAlert.exe)",
-      "Bash(rm -f \"C:\\\\Users\\\\hllee\\\\OneDrive\\\\문서\\\\Claude\\\\Projects\\\\ClaudeAlert\\\\src\\\\ClaudeAlert\\\\ClaudeAlert\\\\bin\\\\Release\\\\net7.0-windows\\\\ClaudeAlert.exe\")"
+      "Bash(rm -f \"C:\\\\Users\\\\hllee\\\\OneDrive\\\\문서\\\\Claude\\\\Projects\\\\ClaudeAlert\\\\src\\\\ClaudeAlert\\\\ClaudeAlert\\\\bin\\\\Release\\\\net7.0-windows\\\\ClaudeAlert.exe\")",
+      "Bash(dotnet publish:*)",
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(python -m pip install Pillow -q)",
+      "Bash(python3 -m pip install Pillow -q)",
+      "Bash(where python:*)",
+      "Bash(where python3:*)",
+      "Bash(where uv:*)",
+      "Bash(uv pip:*)",
+      "Bash(uv run --with Pillow python -c ':*)",
+      "Bash(gh release:*)"
     ]
   }
 }

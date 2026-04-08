@@ -111,33 +111,8 @@ public partial class OverlayWindow : Window
                 return;
             }
 
-            // Default placeholder: blue circle with face
-            var size = _settings.ImageSize;
-            var dv = new DrawingVisual();
-            using (var dc = dv.RenderOpen())
-            {
-                var r = size / 2.0 - 2;
-                var cx = size / 2.0;
-                var cy = size / 2.0;
-                dc.DrawEllipse(
-                    new LinearGradientBrush(
-                        Color.FromRgb(100, 180, 255),
-                        Color.FromRgb(60, 120, 200), 90),
-                    new Pen(Brushes.White, 2),
-                    new Point(cx, cy), r, r);
-                var eyeOffX = size * 0.125;
-                var eyeY = cy - size * 0.06;
-                dc.DrawEllipse(Brushes.White, null, new Point(cx - eyeOffX, eyeY), size * 0.06, size * 0.08);
-                dc.DrawEllipse(Brushes.White, null, new Point(cx + eyeOffX, eyeY), size * 0.06, size * 0.08);
-                dc.DrawEllipse(Brushes.Black, null, new Point(cx - eyeOffX, eyeY + 1), size * 0.03, size * 0.05);
-                dc.DrawEllipse(Brushes.Black, null, new Point(cx + eyeOffX, eyeY + 1), size * 0.03, size * 0.05);
-                var mouthY = cy + size * 0.1;
-                dc.DrawGeometry(null, new Pen(Brushes.White, 1.5),
-                    Geometry.Parse($"M {cx - eyeOffX},{mouthY} Q {cx},{mouthY + size * 0.12} {cx + eyeOffX},{mouthY}"));
-            }
-            var bmp = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
-            bmp.Render(dv);
-            PetImage.Source = bmp;
+            // Load embedded default image
+            PetImage.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Icons/default.png"));
         }
         catch { }
     }
