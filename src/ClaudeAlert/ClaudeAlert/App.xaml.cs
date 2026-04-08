@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using ClaudeAlert.Core;
 using ClaudeAlert.EventSources;
 using ClaudeAlert.Notifications;
@@ -110,6 +111,17 @@ public partial class App : Application
 
         // System tray
         _trayManager = new TrayIconManager(statusManager, _overlay, _statusBar);
+
+        // Auto-acknowledge when Claude Code window is focused
+        var focusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        focusTimer.Tick += (_, _) =>
+        {
+            if (statusManager.IsEscalating && FocusHelper.IsClaudeCodeFocused())
+            {
+                statusManager.Acknowledge();
+            }
+        };
+        focusTimer.Start();
     }
 
     protected override void OnExit(ExitEventArgs e)
