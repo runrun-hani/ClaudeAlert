@@ -9,6 +9,8 @@ public class PhysicsEngine
     private double _groundY;
     private double _screenWidth;
     private double _screenHeight;
+    private double _screenLeft;
+    private double _screenTop;
     private bool _running;
     private DateTime _lastFrame;
 
@@ -24,10 +26,12 @@ public class PhysicsEngine
 
     public void UpdateScreenBounds()
     {
-        _screenWidth = SystemParameters.PrimaryScreenWidth;
-        _screenHeight = SystemParameters.PrimaryScreenHeight;
+        _screenWidth = SystemParameters.VirtualScreenWidth;
+        _screenHeight = SystemParameters.VirtualScreenHeight;
+        _screenLeft = SystemParameters.VirtualScreenLeft;
+        _screenTop = SystemParameters.VirtualScreenTop;
         // Ground = top of taskbar (approx 48px from bottom)
-        _groundY = _screenHeight - 48 - _body.Height;
+        _groundY = _screenTop + _screenHeight - 48 - _body.Height;
     }
 
     public double GroundY => _groundY;
@@ -108,22 +112,22 @@ public class PhysicsEngine
             }
         }
 
-        // Wall collisions
-        if (pos.X <= 0)
+        // Wall collisions (virtual screen bounds for multi-monitor)
+        if (pos.X <= _screenLeft)
         {
-            pos.X = 0;
+            pos.X = _screenLeft;
             _body.Velocity = new Vector(-_body.Velocity.X * _body.BounceFactor, _body.Velocity.Y);
         }
-        else if (pos.X + _body.Width >= _screenWidth)
+        else if (pos.X + _body.Width >= _screenLeft + _screenWidth)
         {
-            pos.X = _screenWidth - _body.Width;
+            pos.X = _screenLeft + _screenWidth - _body.Width;
             _body.Velocity = new Vector(-_body.Velocity.X * _body.BounceFactor, _body.Velocity.Y);
         }
 
         // Ceiling collision
-        if (pos.Y <= 0)
+        if (pos.Y <= _screenTop)
         {
-            pos.Y = 0;
+            pos.Y = _screenTop;
             _body.Velocity = new Vector(_body.Velocity.X, -_body.Velocity.Y * _body.BounceFactor);
         }
 

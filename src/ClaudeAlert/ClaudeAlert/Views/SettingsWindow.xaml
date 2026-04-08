@@ -32,11 +32,11 @@
             <!-- Language -->
             <StackPanel Grid.Row="1" Margin="0,0,0,12">
                 <TextBlock x:Name="LanguageLabel" Text="언어" Foreground="#CCCCCC" FontSize="12" Margin="0,0,0,4"/>
-                <ComboBox x:Name="LanguageCombo" Background="#2D2D2D" Foreground="White"
+                <ComboBox x:Name="LanguageCombo" Background="#2D2D2D" Foreground="Black"
                           FontSize="13" Padding="6,4"
                           SelectionChanged="OnLanguageChanged">
-                    <ComboBoxItem Content="한국어" Tag="Korean"/>
-                    <ComboBoxItem Content="English" Tag="English"/>
+                    <ComboBoxItem Content="한국어" Tag="Korean" Foreground="Black"/>
+                    <ComboBoxItem Content="English" Tag="English" Foreground="Black"/>
                 </ComboBox>
             </StackPanel>
 

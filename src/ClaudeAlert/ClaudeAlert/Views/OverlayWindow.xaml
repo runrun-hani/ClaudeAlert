@@ -17,40 +17,39 @@
             </TransformGroup>
         </Grid.RenderTransform>
 
-        <!-- Speech bubble (above image) -->
-        <Border x:Name="SpeechBubble"
-                VerticalAlignment="Top"
-                HorizontalAlignment="Center"
-                Margin="0,-36,0,0"
-                Background="White"
-                CornerRadius="8"
-                Padding="8,4"
-                Visibility="Collapsed"
-                RenderTransformOrigin="0.5,1">
-            <Border.RenderTransform>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Speech bubble (Row 0, above image) -->
+        <StackPanel x:Name="BubblePanel" Grid.Row="0"
+                    HorizontalAlignment="Center"
+                    Visibility="Collapsed"
+                    Margin="0,0,0,2">
+            <StackPanel.RenderTransform>
                 <RotateTransform x:Name="BubbleCounterRotate" Angle="0"/>
-            </Border.RenderTransform>
-            <TextBlock x:Name="BubbleText"
-                       FontSize="11"
-                       Foreground="#333"
-                       FontFamily="Segoe UI"
-                       TextAlignment="Center"/>
-        </Border>
+            </StackPanel.RenderTransform>
+            <Border x:Name="SpeechBubble"
+                    Background="White"
+                    CornerRadius="8"
+                    Padding="8,4">
+                <TextBlock x:Name="BubbleText"
+                           FontSize="11"
+                           Foreground="#333"
+                           FontFamily="Segoe UI"
+                           TextAlignment="Center"/>
+            </Border>
+            <!-- Bubble tail -->
+            <Polygon Points="0,0 10,0 5,6"
+                     Fill="White"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
 
-        <!-- Bubble tail (triangle pointing down) -->
-        <Polygon x:Name="BubbleTail"
-                 Points="0,0 10,0 5,6"
-                 Fill="White"
-                 VerticalAlignment="Top"
-                 HorizontalAlignment="Center"
-                 Margin="0,-6,0,0"
-                 Visibility="Collapsed"/>
-
-        <!-- Pet image -->
-        <Image x:Name="PetImage"
+        <!-- Pet image (Row 1) -->
+        <Image x:Name="PetImage" Grid.Row="1"
                Width="64" Height="64"
-               VerticalAlignment="Bottom"
                Stretch="Uniform"
-               RenderOptions.BitmapScalingMode="HighQuality"/>
+               RenderOptions.BitmapScalingMode="NearestNeighbor"/>
     </Grid>
 </Window>

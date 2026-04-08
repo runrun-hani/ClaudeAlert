@@ -12,7 +12,10 @@
       "Bash(powershell.exe -Command \"Start-Process explorer.exe -ArgumentList ''/select,C:\\\\Users\\\\hllee\\\\AppData\\\\Roaming\\\\ClaudeAlert\\\\config.json''\")",
       "Bash(powershell.exe -Command \"[Environment]::GetFolderPath\\(''MyDocuments''\\)\")",
       "Bash(mkdir -p \"C:/Users/hllee/OneDrive/문서/ClaudeAlert/images\")",
-      "Read(//c/Users/hllee/OneDrive/문서/**)"
+      "Read(//c/Users/hllee/OneDrive/문서/**)",
+      "Bash(gh repo:*)",
+      "Bash(tasklist /fi \"imagename eq ClaudeAlert.exe\")",
+      "Bash(handle \"ClaudeAlert.exe\")"
     ]
   }
 }

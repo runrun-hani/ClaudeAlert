@@ -74,7 +74,7 @@ public class EscalationController
         {
             EscalationLevel.Jump => TimeSpan.FromSeconds(2.5),
             EscalationLevel.Roll => TimeSpan.FromSeconds(3),
-            EscalationLevel.Bounce => TimeSpan.FromSeconds(4),
+            EscalationLevel.Bounce => TimeSpan.FromSeconds(2),
             _ => TimeSpan.FromSeconds(1)
         };
         if (now - _lastActionTime < cooldown) return;
@@ -108,10 +108,11 @@ public class EscalationController
         // Roll along taskbar
         if (_body.IsStatic || Math.Abs(_body.Velocity.X) < 10)
         {
-            var screenWidth = SystemParameters.PrimaryScreenWidth;
+            var screenLeft = SystemParameters.VirtualScreenLeft;
+            var screenRight = screenLeft + SystemParameters.VirtualScreenWidth;
             // Reverse at edges
-            if (_body.Position.X <= 10) _rollDirection = 1;
-            else if (_body.Right >= screenWidth - 10) _rollDirection = -1;
+            if (_body.Position.X <= screenLeft + 10) _rollDirection = 1;
+            else if (_body.Right >= screenRight - 10) _rollDirection = -1;
 
             _body.ApplyImpulse(new Vector(_rollDirection * 200, -100));
             _body.AngularVelocity = _rollDirection * 360;
@@ -120,16 +121,15 @@ public class EscalationController
 
     private void DoBounce()
     {
-        // Full screen bounce - if static, launch it
-        if (_body.IsStatic || _body.Velocity.Length < 50)
+        // Full screen bounce - chaotic mode
+        if (_body.IsStatic || _body.Velocity.Length < 100)
         {
             var angle = _random.NextDouble() * Math.PI * 2;
-            var speed = 400 + _random.Next(200);
-            _body.ApplyImpulse(new Vector(Math.Cos(angle) * speed, Math.Sin(angle) * speed - 300));
-            _body.AngularVelocity = (_random.NextDouble() - 0.5) * 720;
-            // Reduce gravity and increase bounce for DVD-logo effect
-            _body.Gravity = 400;
-            _body.BounceFactor = 0.85;
+            var speed = 800 + _random.Next(400);
+            _body.ApplyImpulse(new Vector(Math.Cos(angle) * speed, Math.Sin(angle) * speed - 600));
+            _body.AngularVelocity = (_random.NextDouble() - 0.5) * 1440;
+            _body.Gravity = 300;
+            _body.BounceFactor = 0.92;
         }
     }
 

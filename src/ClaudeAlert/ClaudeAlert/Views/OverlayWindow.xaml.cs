@@ -209,16 +209,15 @@ public partial class OverlayWindow : Window
         if (key == null) return;
 
         BubbleText.Text = L10n.Get(key);
-        SpeechBubble.Visibility = Visibility.Visible;
-        BubbleTail.Visibility = Visibility.Visible;
+        BubbleText.FontSize = Math.Max(11, _settings.ImageSize * 0.18);
+        BubblePanel.Visibility = Visibility.Visible;
         _bubbleHideTimer.Stop();
         _bubbleHideTimer.Start();
     }
 
     private void HideBubble()
     {
-        SpeechBubble.Visibility = Visibility.Collapsed;
-        BubbleTail.Visibility = Visibility.Collapsed;
+        BubblePanel.Visibility = Visibility.Collapsed;
     }
 
     private void OnPhysicsUpdated()
