@@ -10,6 +10,7 @@ public class ClaudeStatusManager : INotifyPropertyChanged
     private DateTime _lastActivityTime = DateTime.UtcNow;
     private DateTime _lastStateChangeTime = DateTime.UtcNow;
     private DateTime? _escalationStartTime;
+    private DateTime _acknowledgeTime = DateTime.MinValue;
     private readonly DispatcherTimer _timer;
     private readonly AppSettings _settings;
 
@@ -89,6 +90,12 @@ public class ClaudeStatusManager : INotifyPropertyChanged
         _lastActivityTime = evt.Timestamp;
         EventReceived?.Invoke(evt);
 
+        // Ignore escalation events shortly after acknowledge
+        if (CurrentState == ClaudeState.Acknowledged &&
+            (DateTime.UtcNow - _acknowledgeTime).TotalSeconds < 5 &&
+            evt.Type != "tool_use")
+            return;
+
         switch (evt.Type)
         {
             case "tool_use":
@@ -117,6 +124,7 @@ public class ClaudeStatusManager : INotifyPropertyChanged
     public void Acknowledge()
     {
         StopEscalation();
+        _acknowledgeTime = DateTime.UtcNow;
         CurrentState = ClaudeState.Acknowledged;
     }
 

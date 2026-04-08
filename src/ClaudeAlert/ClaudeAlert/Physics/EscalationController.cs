@@ -55,9 +55,9 @@ public class EscalationController
         var elapsed = _statusManager.EscalationElapsed.TotalSeconds;
         var newLevel = elapsed switch
         {
-            >= 180 => EscalationLevel.Bounce, // 3 min -> screen bounce
-            >= 60 => EscalationLevel.Roll,     // 1 min -> roll on taskbar
-            >= 30 => EscalationLevel.Jump,     // 30s -> jump in place
+            _ when elapsed >= _settings.EscalationBounceSeconds => EscalationLevel.Bounce,
+            _ when elapsed >= _settings.EscalationRollSeconds => EscalationLevel.Roll,
+            _ when elapsed >= _settings.EscalationJumpSeconds => EscalationLevel.Jump,
             _ => EscalationLevel.None
         };
 
@@ -114,8 +114,8 @@ public class EscalationController
             if (_body.Position.X <= screenLeft + 10) _rollDirection = 1;
             else if (_body.Right >= screenRight - 10) _rollDirection = -1;
 
-            _body.ApplyImpulse(new Vector(_rollDirection * 200, -100));
-            _body.AngularVelocity = _rollDirection * 360;
+            _body.ApplyImpulse(new Vector(_rollDirection * 400, -150));
+            _body.AngularVelocity = _rollDirection * 540;
             _engine.Start();
         }
     }
@@ -141,7 +141,6 @@ public class EscalationController
         _body.Gravity = 980;
         _body.BounceFactor = 0.5;
         _body.MakeStatic();
-        _body.Rotation = 0;
         _body.ScaleX = 1;
         _body.ScaleY = 1;
         LevelChanged?.Invoke(_currentLevel);

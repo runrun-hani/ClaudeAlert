@@ -83,11 +83,15 @@ public partial class OverlayWindow : Window
     public EscalationController Escalation => _escalation;
     public StatusBarWindow? StatusBar { get; set; }
 
+    private static readonly int BubbleReservedHeight = 40;
+
     private void ApplyImageSize(int size)
     {
         PetImage.Width = size;
         PetImage.Height = size;
-        // RenderTransformOrigin="0.5,0.5" handles centering automatically
+        System.Windows.Controls.Canvas.SetTop(PetImage, BubbleReservedHeight);
+        PetContainer.Width = Math.Max(size, 80);
+        PetContainer.Height = size + BubbleReservedHeight;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -148,10 +152,12 @@ public partial class OverlayWindow : Window
             if (newState == ClaudeState.Acknowledged)
             {
                 _escalation.Reset();
+                _engine.Stop();
                 _body.Position = new Point(_body.Position.X, _engine.GroundY);
                 _body.MakeStatic();
                 SyncWindowToBody();
                 _bubbleReshowTimer.Stop();
+                HideBubble();
             }
             else if (_statusManager.IsEscalating)
             {

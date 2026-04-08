@@ -82,7 +82,7 @@ public partial class App : Application
         _trayManager = new TrayIconManager(statusManager, _overlay, _statusBar);
 
         // Auto-acknowledge when Claude Code window is focused
-        var focusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        var focusTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         focusTimer.Tick += (_, _) =>
         {
             if (statusManager.IsEscalating && FocusHelper.IsClaudeCodeFocused())

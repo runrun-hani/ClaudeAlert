@@ -124,10 +124,9 @@ public class PhysicsEngine
                 if (Math.Abs(_body.Velocity.X) < 5 && Math.Abs(_body.AngularVelocity) < 1)
                 {
                     _body.MakeStatic();
-                    _body.Rotation = 0;
                     _body.ScaleX = 1;
                     _body.ScaleY = 1;
-                    Stop(); // stop engine when body is at rest
+                    Stop();
                 }
             }
             else
