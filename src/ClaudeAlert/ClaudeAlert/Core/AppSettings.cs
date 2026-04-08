@@ -12,6 +12,9 @@ public class AppSettings
     public int EscalationBounceSeconds { get; set; } = 180;
     public bool SoundEnabled { get; set; } = true;
     public string? CustomImagePath { get; set; }
+    public int ImageSize { get; set; } = 64;
+    public double FontSize { get; set; } = 10;
+    public string Language { get; set; } = "Korean";
 
     private static readonly string ConfigDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ClaudeAlert");
