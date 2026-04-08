@@ -96,14 +96,35 @@ public partial class App : Application
         // System tray
         _trayManager = new TrayIconManager(statusManager, _overlay, _statusBar);
 
-        // Auto-acknowledge when Claude Code window is focused
+        // Auto-acknowledge when user SWITCHES to Claude Code
+        // (not when they're already there when escalation starts)
+        bool wasClaudeFocusedAtEscalationStart = false;
+        bool wasClaudeFocusedLastCheck = false;
+
+        statusManager.StateChanged += (_, newState) =>
+        {
+            if (statusManager.IsEscalating)
+                wasClaudeFocusedAtEscalationStart = FocusHelper.IsClaudeCodeFocused();
+        };
+
         var focusTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         focusTimer.Tick += (_, _) =>
         {
-            if (statusManager.IsEscalating && FocusHelper.IsClaudeCodeFocused())
+            var isFocused = FocusHelper.IsClaudeCodeFocused();
+            if (statusManager.IsEscalating && isFocused && !wasClaudeFocusedLastCheck)
             {
-                statusManager.Acknowledge();
+                // User just switched TO Claude Code → acknowledge
+                if (!wasClaudeFocusedAtEscalationStart)
+                {
+                    _statusBar?.AddDebugLog("AUTO-ACK: switched to Claude");
+                    statusManager.Acknowledge();
+                }
             }
+            wasClaudeFocusedLastCheck = isFocused;
+
+            // Once user leaves Claude Code, clear the "was focused at start" flag
+            if (!isFocused)
+                wasClaudeFocusedAtEscalationStart = false;
         };
         focusTimer.Start();
     }
