@@ -90,10 +90,9 @@ public class ClaudeStatusManager : INotifyPropertyChanged
         _lastActivityTime = evt.Timestamp;
         EventReceived?.Invoke(evt);
 
-        // Ignore escalation events shortly after acknowledge
-        if (CurrentState == ClaudeState.Acknowledged &&
-            (DateTime.UtcNow - _acknowledgeTime).TotalSeconds < 5 &&
-            evt.Type != "tool_use")
+        // After acknowledge, only accept tool_use (active work) events for a cooldown period
+        var sinceAck = (DateTime.UtcNow - _acknowledgeTime).TotalSeconds;
+        if (sinceAck < 10 && evt.Type != "tool_use")
             return;
 
         switch (evt.Type)

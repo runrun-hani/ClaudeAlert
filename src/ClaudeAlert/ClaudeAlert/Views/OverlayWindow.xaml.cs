@@ -83,15 +83,10 @@ public partial class OverlayWindow : Window
     public EscalationController Escalation => _escalation;
     public StatusBarWindow? StatusBar { get; set; }
 
-    private static readonly int BubbleReservedHeight = 40;
-
     private void ApplyImageSize(int size)
     {
         PetImage.Width = size;
         PetImage.Height = size;
-        System.Windows.Controls.Canvas.SetTop(PetImage, BubbleReservedHeight);
-        PetContainer.Width = Math.Max(size, 80);
-        PetContainer.Height = size + BubbleReservedHeight;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -205,7 +200,9 @@ public partial class OverlayWindow : Window
     private void SyncWindowToBody()
     {
         Left = _body.Position.X;
-        Top = _body.Position.Y;
+        // Offset window top by bubble height so the IMAGE stays at body position
+        var bubbleHeight = BubblePanel.Visibility == Visibility.Visible ? BubblePanel.ActualHeight : 0;
+        Top = _body.Position.Y - bubbleHeight;
         RotateTransform.Angle = _body.Rotation;
         SquashTransform.ScaleX = _body.ScaleX;
         SquashTransform.ScaleY = _body.ScaleY;
