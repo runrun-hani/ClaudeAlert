@@ -276,6 +276,11 @@ public partial class OverlayWindow : Window
                 _settings.FontSize = settings.FontSize;
                 _settings.Language = settings.Language;
                 _settings.CustomImagePath = settings.CustomImagePath;
+                _settings.StuckThresholdSeconds = settings.StuckThresholdSeconds;
+                _settings.EscalationJumpSeconds = settings.EscalationJumpSeconds;
+                _settings.EscalationRollSeconds = settings.EscalationRollSeconds;
+                _settings.EscalationBounceSeconds = settings.EscalationBounceSeconds;
+                _settings.SoundEnabled = settings.SoundEnabled;
                 ApplySettings();
                 StatusBar?.ApplyFontSize(settings.FontSize);
             });
