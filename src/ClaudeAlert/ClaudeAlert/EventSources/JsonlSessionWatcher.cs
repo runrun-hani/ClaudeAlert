@@ -13,6 +13,8 @@ public class JsonlSessionWatcher : IClaudeEventSource
     private long _lastPosition;
     private readonly System.Timers.Timer _scanTimer;
 
+    private System.Timers.Timer? _permissionTimer;
+
     public event Action<ClaudeEvent>? OnEvent;
 
     public JsonlSessionWatcher()
@@ -170,19 +172,42 @@ public class JsonlSessionWatcher : IClaudeEventSource
             switch (reason)
             {
                 case "tool_use":
-                    // Claude wants to use a tool → waiting for user permission
-                    OnEvent?.Invoke(ClaudeEvent.Now("permission_prompt"));
+                    // Claude wants to use a tool — emit tool_use now,
+                    // but start a timer: if no tool_result comes within 3s,
+                    // it's likely waiting for user permission
+                    OnEvent?.Invoke(ClaudeEvent.Now("tool_use"));
+                    StartPermissionTimer();
                     return;
                 case "end_turn":
+                    CancelPermissionTimer();
                     OnEvent?.Invoke(ClaudeEvent.Now("stop"));
                     return;
             }
         }
     }
 
+    private void StartPermissionTimer()
+    {
+        CancelPermissionTimer();
+        _permissionTimer = new System.Timers.Timer(3000) { AutoReset = false };
+        _permissionTimer.Elapsed += (_, _) =>
+        {
+            OnEvent?.Invoke(ClaudeEvent.Now("permission_prompt"));
+        };
+        _permissionTimer.Start();
+    }
+
+    private void CancelPermissionTimer()
+    {
+        _permissionTimer?.Stop();
+        _permissionTimer?.Dispose();
+        _permissionTimer = null;
+    }
+
     private void ProcessToolResult(JsonElement root)
     {
-        // Tool result arrived → tool was approved and executed
+        // Tool result arrived → tool was approved and executed, cancel permission timer
+        CancelPermissionTimer();
         OnEvent?.Invoke(ClaudeEvent.Now("tool_use"));
 
         // Also check for errors in the result

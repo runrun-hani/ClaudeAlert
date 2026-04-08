@@ -93,9 +93,10 @@ public class ClaudeStatusManager : INotifyPropertyChanged
         _lastActivityTime = evt.Timestamp;
         EventReceived?.Invoke(evt);
 
-        // After acknowledge, only accept tool_use (active work) events for a cooldown period
+        // After acknowledge, ignore repeated stop/error events briefly
+        // but always allow tool_use and permission_prompt through
         var sinceAck = (DateTime.UtcNow - _acknowledgeTime).TotalSeconds;
-        if (sinceAck < 10 && evt.Type != "tool_use")
+        if (sinceAck < 3 && evt.Type is "stop" or "idle_prompt" or "error")
             return;
 
         switch (evt.Type)
