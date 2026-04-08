@@ -146,15 +146,15 @@ public class JsonlSessionWatcher : IClaudeEventSource
                     ProcessAssistantMessage(root);
                     break;
                 case "tool_result":
-                    ProcessToolResult(root);
-                    break;
-                case "user":
-                    // User sent a message → session is active
-                    OnEvent?.Invoke(ClaudeEvent.Now("tool_use"));
+                    // Tool executed — cancel permission timer, stay in current state
+                    CancelPermissionTimer();
+                    CheckToolResultForErrors(root);
                     break;
                 case "system":
                     ProcessSystemMessage(root);
                     break;
+                // "user" messages intentionally ignored —
+                // Claude working is only detected from "assistant" messages
             }
         }
         catch { }
@@ -204,13 +204,8 @@ public class JsonlSessionWatcher : IClaudeEventSource
         _permissionTimer = null;
     }
 
-    private void ProcessToolResult(JsonElement root)
+    private void CheckToolResultForErrors(JsonElement root)
     {
-        // Tool result arrived → tool was approved and executed, cancel permission timer
-        CancelPermissionTimer();
-        OnEvent?.Invoke(ClaudeEvent.Now("tool_use"));
-
-        // Also check for errors in the result
         if (root.TryGetProperty("message", out var msg) &&
             msg.TryGetProperty("content", out var content))
         {
