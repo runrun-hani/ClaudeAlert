@@ -61,20 +61,34 @@ public static class FocusHelper
             var fgWnd = GetForegroundWindow();
             if (fgWnd == IntPtr.Zero) return false;
 
-            // Get the actual foreground window title (more reliable than process title)
-            var sb = new System.Text.StringBuilder(512);
-            GetWindowText(fgWnd, sb, 512);
-            var title = sb.ToString();
-
-            // Match Claude Code desktop app, terminal running claude, etc.
-            if (title.Contains("Claude", StringComparison.OrdinalIgnoreCase))
-                return true;
-
-            // Also check process name for claude-related processes
             GetWindowThreadProcessId(fgWnd, out int pid);
             var proc = Process.GetProcessById(pid);
-            var procName = proc.ProcessName;
-            return procName.Contains("claude", StringComparison.OrdinalIgnoreCase);
+            var procName = proc.ProcessName.ToLowerInvariant();
+
+            // Claude Code desktop app process
+            if (procName.Contains("claude"))
+                return true;
+
+            // Terminal apps that might be running Claude Code CLI
+            var isTerminal = procName is "windowsterminal" or "cmd" or "powershell"
+                or "pwsh" or "conhost" or "wt";
+
+            if (isTerminal)
+            {
+                // Check window title for Claude Code indicators
+                var sb = new System.Text.StringBuilder(512);
+                GetWindowText(fgWnd, sb, 512);
+                var title = sb.ToString();
+
+                // Match "claude" as a command, not as part of a file path
+                // e.g. "claude - WindowsTerminal" or "claude code" but NOT "C:\...\Claude\..."
+                if (title.StartsWith("claude", StringComparison.OrdinalIgnoreCase) ||
+                    title.Contains(" claude", StringComparison.OrdinalIgnoreCase) ||
+                    title.Contains("Claude Code", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
         }
         catch
         {
