@@ -23,6 +23,7 @@ public class EscalationController
     private EscalationLevel _currentLevel = EscalationLevel.None;
     private double _rollDirection = 1;
     private DateTime _lastActionTime = DateTime.MinValue;
+    private DateTime? _bounceStartTime;
 
     public event Action<EscalationLevel>? LevelChanged;
     public EscalationLevel CurrentLevel => _currentLevel;
@@ -61,14 +62,17 @@ public class EscalationController
             _ => EscalationLevel.None
         };
 
+        var now = DateTime.UtcNow;
+
         if (newLevel != _currentLevel)
         {
             _currentLevel = newLevel;
+            if (newLevel == EscalationLevel.Bounce)
+                _bounceStartTime = now;
             LevelChanged?.Invoke(_currentLevel);
         }
 
         // Throttle actions - don't fire every 100ms
-        var now = DateTime.UtcNow;
         var cooldown = _currentLevel switch
         {
             EscalationLevel.Jump => TimeSpan.FromSeconds(2.5),
@@ -133,12 +137,14 @@ public class EscalationController
         {
             // Initial kick in random direction
             var angle = _random.NextDouble() * Math.PI * 2;
-            _body.ApplyImpulse(new Vector(Math.Cos(angle) * 10000, Math.Sin(angle) * 10000));
+            _body.ApplyImpulse(new Vector(Math.Cos(angle) * 25000, Math.Sin(angle) * 25000));
             _body.AngularVelocity = (_random.NextDouble() - 0.5) * 720;
         }
-        else if (_body.Velocity.Length < BounceMaxSpeed)
+        else if (_body.Velocity.Length < BounceMaxSpeed
+                 && _bounceStartTime.HasValue
+                 && (DateTime.UtcNow - _bounceStartTime.Value).TotalSeconds >= 0.5)
         {
-            // Accelerate in current movement direction
+            // Accelerate in current movement direction (delayed 0.5s to let initial kick take effect)
             var dir = _body.Velocity;
             dir.Normalize();
             _body.ApplyImpulse(dir * BounceAccelForce);
@@ -148,6 +154,7 @@ public class EscalationController
     public void Reset()
     {
         _currentLevel = EscalationLevel.None;
+        _bounceStartTime = null;
         _body.Gravity = 980;
         _body.BounceFactor = 0.5;
         // Stop in place — don't teleport to ground
